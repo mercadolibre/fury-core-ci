@@ -1,6 +1,6 @@
 FROM alpine
 
-COPY ./contrib/semver ./contrib/semver
+COPY ./semver ./contrib/semver
 RUN install ./contrib/semver /usr/local/bin
 COPY entrypoint.sh /entrypoint.sh
 
