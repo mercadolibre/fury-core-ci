@@ -7,6 +7,7 @@ release_branches=${RELEASE_BRANCHES:-master}
 custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
 dryrun=${DRY_RUN:-false}
+rc=${RC:-false}
 
 cd ${GITHUB_WORKSPACE}/${source}
 
@@ -70,6 +71,11 @@ then
 	then
 			new="$new-${commit:0:7}"
 	fi
+fi
+
+if $rc
+then
+  new="$new-rc"
 fi
 
 if [ ! -z $custom_tag ]
