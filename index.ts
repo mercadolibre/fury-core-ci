@@ -40,8 +40,12 @@ async function run() {
                 core.info('PR is a draft, skipping')
                 return
             }
-            if (!['opened', 'edited', 'ready_for_review', 'synchronize'].includes(prPayload.action)) {
+            if (!['opened', 'edited', 'closed', 'ready_for_review', 'synchronize'].includes(prPayload.action)) {
                 core.info('PR action not supported, skipping')
+                return
+            }
+            // PR NOT merged:
+            if (prPayload.action === 'closed' && !prPayload.pull_request.merged) {
                 return
             }
             // PR merged:
