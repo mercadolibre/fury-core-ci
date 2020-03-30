@@ -10077,10 +10077,11 @@ function run() {
             });
             // Get the ID, html_url, and upload URL for the created Release from the response
             const { data: { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl } } = createReleaseResponse;
+            console.log(JSON.stringify(createReleaseResponse.data));
             // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
-            core.setOutput('id', releaseId);
-            core.setOutput('html_url', htmlUrl);
-            core.setOutput('upload_url', uploadUrl);
+            // core.setOutput('id', releaseId);
+            // core.setOutput('html_url', htmlUrl);
+            // core.setOutput('upload_url', uploadUrl);
         }
         catch (error) {
             core.setFailed(error.message);
