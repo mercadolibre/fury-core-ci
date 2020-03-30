@@ -29,6 +29,10 @@ async function run() {
         //     // pushPayload.base_ref
         // }
 
+        if (Github.context.eventName === 'issue_comment') {
+            console.log(JSON.stringify(Github.context.payload))
+            return
+        }
         if (Github.context.eventName === 'pull_request') {
             prerelease = true
             const prPayload = Github.context.payload as Webhooks.WebhookPayloadPullRequest

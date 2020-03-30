@@ -1,6 +1,8 @@
 name: Create release candidate tag
 on:
-  pull_request:
+  pull_request
+  issue_comment:
+    types: [created]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -8,6 +10,6 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
     - name: Push RC tag
-      uses: arcticfalcon/test-actions@v1
+      uses: arcticfalcon/test-actions@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
