@@ -2293,6 +2293,7 @@ async function run() {
         const myToken = process.env['GITHUB_TOKEN']
 core.debug(myToken)
         const octokit = new Github.GitHub(myToken);
+        const {owner, repo} = Github.context.repo
         // Identify branch
         let branch = core.getInput('GITHUB_REF')
         core.debug(branch)
@@ -2303,6 +2304,7 @@ core.debug(myToken)
         }
         // Define tag and release name
         let bump = ''
+        const fromBranch = ''
         switch (fromBranch) {
             case 'fix/*':
                 bump = 'patch'
@@ -2326,7 +2328,7 @@ core.debug(myToken)
 
         //context.payload.pull_request.head.ref
         //Github.context.payload.ref
-        const {owner, repo} = Github.context.repo
+
         const createReleaseResponse = await octokit.repos.createRelease({
             owner,
             repo,
