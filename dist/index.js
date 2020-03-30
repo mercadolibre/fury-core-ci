@@ -10047,6 +10047,8 @@ function run() {
             if (prerelease) {
                 const rcName = `rc-${branch.replace('/', '-')}`;
                 const rcs = tags.data.filter(tag => tag.name.includes(rcName));
+                console.log(rcName);
+                console.log(rcs);
                 if (rcs.length === 0) {
                     // increase RC number
                     newTag = semver.inc(rcs[0], 'prerelease');
