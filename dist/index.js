@@ -2332,24 +2332,24 @@ async function run() {
         //context.payload.pull_request.head.ref
         //Github.context.payload.ref
 
-        const createReleaseResponse = await octokit.repos.createRelease({
-            owner,
-            repo,
-            tag_name: newTag,
-            name: releaseName,
-            body: '',
-            draft: false,
-            prerelease
-        });
-        // Get the ID, html_url, and upload URL for the created Release from the response
-        const {
-            data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
-        } = createReleaseResponse;
-
-        // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
-        core.setOutput('id', releaseId);
-        core.setOutput('html_url', htmlUrl);
-        core.setOutput('upload_url', uploadUrl);
+        // const createReleaseResponse = await octokit.repos.createRelease({
+        //     owner,
+        //     repo,
+        //     tag_name: newTag,
+        //     name: releaseName,
+        //     body: '',
+        //     draft: false,
+        //     prerelease
+        // });
+        // // Get the ID, html_url, and upload URL for the created Release from the response
+        // const {
+        //     data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
+        // } = createReleaseResponse;
+        //
+        // // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
+        // core.setOutput('id', releaseId);
+        // core.setOutput('html_url', htmlUrl);
+        // core.setOutput('upload_url', uploadUrl);
     } catch (error) {
         core.setFailed(error.message);
     }
