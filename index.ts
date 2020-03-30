@@ -28,7 +28,7 @@ async function run() {
         //     // const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
         //     // pushPayload.base_ref
         // }
-
+console.log(Github.context.eventName)
         if (Github.context.eventName === 'issue_comment') {
             console.log(JSON.stringify(Github.context.payload))
             return
