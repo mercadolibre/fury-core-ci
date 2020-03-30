@@ -10086,7 +10086,7 @@ function run() {
                 const new_comment = yield octokit.issues.createComment({
                     repo,
                     issue_number: prNumber,
-                    owner: 'Fury Core Actions',
+                    owner: Github.context.actor,
                     body: `Tag \`${newTag}\` created.`
                 });
                 console.log(JSON.stringify(new_comment));
