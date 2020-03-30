@@ -16,24 +16,20 @@ async function run() {
         const octokit = new Github.GitHub(token);
         const {owner, repo} = Github.context.repo
 
-        let prerelease = false
+        let prerelease = true
         let branch = ''
         let body = ''
         if (Github.context.eventName === 'push') {
             const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
-            console.log(JSON.stringify(pushPayload))
-            return
-            // branch = Github.context.ref.replace('refs/heads/', '')
-            // if(branch !== 'master'){
-            //     core.info('push not to master, skipping')
-            //     return
-            // }
-            // const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
-            // pushPayload.base_ref
+            branch = pushPayload.ref.replace('refs/heads/', '')
+            if(branch === 'master'){
+                core.info('pushed to master, skipping')
+                console.log(JSON.stringify(pushPayload))
+                return
+            }
         }
 
         if (Github.context.eventName === 'pull_request') {
-            prerelease = true
             const prPayload = Github.context.payload as Webhooks.WebhookPayloadPullRequest
             if (prPayload.pull_request.base.ref !== 'master') {
                 core.info('PR not to master, skipping')
