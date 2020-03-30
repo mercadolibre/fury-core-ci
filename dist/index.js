@@ -2618,7 +2618,6 @@ async function run() {
             repo,
             per_page: 100
         });
-        console.log(JSON.stringify((await tags).data))
         const firstValid = (await tags).data.find(tag => semver.valid(tag.name))
         const newTag = semver.inc(firstValid.name, bump)
         const releaseName = ""//todo
