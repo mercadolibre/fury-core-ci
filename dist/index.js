@@ -10053,7 +10053,7 @@ function run() {
                 console.log(rcs);
                 if (rcs.length !== 0) {
                     // increase RC number
-                    newTag = semver.inc(rcs[0], 'prerelease');
+                    newTag = semver.inc(rcs[0].name, 'prerelease');
                 }
                 else {
                     // create RC
