@@ -10050,7 +10050,6 @@ function run() {
             if (prerelease) {
                 const rcName = `rc-${branch.replace('/', '-')}`;
                 const rcs = tags.data.filter(tag => tag.name.includes(rcName));
-                console.log(rcName);
                 console.log(rcs);
                 if (rcs.length !== 0) {
                     // increase RC number
@@ -10064,27 +10063,24 @@ function run() {
             else {
                 newTag = semver.inc(lastTag, bump);
             }
-            const releaseName = ""; //todo
+            const releaseName = newTag; //todo
             console.log(lastTag);
             console.log(newTag);
-            // const createReleaseResponse = await octokit.repos.createRelease({
-            //     owner,
-            //     repo,
-            //     tag_name: newTag,
-            //     name: releaseName,
-            //     body: '',
-            //     draft: false,
-            //     prerelease
-            // });
-            // // Get the ID, html_url, and upload URL for the created Release from the response
-            // const {
-            //     data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
-            // } = createReleaseResponse;
-            //
-            // // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
-            // core.setOutput('id', releaseId);
-            // core.setOutput('html_url', htmlUrl);
-            // core.setOutput('upload_url', uploadUrl);
+            const createReleaseResponse = yield octokit.repos.createRelease({
+                owner,
+                repo,
+                tag_name: newTag,
+                name: releaseName,
+                body: '',
+                draft: false,
+                prerelease
+            });
+            // Get the ID, html_url, and upload URL for the created Release from the response
+            const { data: { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl } } = createReleaseResponse;
+            // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
+            core.setOutput('id', releaseId);
+            core.setOutput('html_url', htmlUrl);
+            core.setOutput('upload_url', uploadUrl);
         }
         catch (error) {
             core.setFailed(error.message);
