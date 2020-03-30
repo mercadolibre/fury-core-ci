@@ -9987,6 +9987,7 @@ function run() {
             const { owner, repo } = Github.context.repo;
             let prerelease = false;
             let branch = '';
+            let body = '';
             // if (Github.context.eventName === 'push') {
             //     branch = Github.context.ref.replace('refs/heads/', '')
             //     if(branch !== 'master'){
@@ -10016,7 +10017,7 @@ function run() {
                     prerelease = false;
                 }
                 branch = prPayload.pull_request.head.ref;
-                // prPayload.pull_request.body
+                body = prPayload.pull_request.body;
             }
             // Define tag and release name
             let bump = '';
@@ -10071,13 +10072,15 @@ function run() {
                 repo,
                 tag_name: newTag,
                 name: releaseName,
-                body: '-',
+                body,
                 draft: false,
                 prerelease
             });
             // Get the ID, html_url, and upload URL for the created Release from the response
-            const { data: { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl } } = createReleaseResponse;
-            console.log(JSON.stringify(createReleaseResponse.data));
+            // const {
+            //     data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
+            // } = createReleaseResponse;
+            console.log(createReleaseResponse.status);
             // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
             // core.setOutput('id', releaseId);
             // core.setOutput('html_url', htmlUrl);
