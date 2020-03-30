@@ -2585,6 +2585,7 @@ async function run() {
         const octokit = new Github.GitHub(token);
         const {owner, repo} = Github.context.repo
 
+        console.log(123)
         console.log(Github.context.eventName)
 
         console.log(JSON.stringify(Github.context.payload))
@@ -2622,7 +2623,7 @@ async function run() {
             repo,
             per_page: 100
         });
-        const fullReleases =  tags.data.filter(tag => semver.prerelease(tag.name))
+        const fullReleases =  tags.data.filter(tag => !semver.prerelease(tag.name))
         const firstValid = fullReleases.find(tag => semver.valid(tag.name))
         let newTag = ""
         if(prerelease) {
