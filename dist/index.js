@@ -10081,12 +10081,14 @@ function run() {
             //     data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
             // } = createReleaseResponse;
             console.log(createReleaseResponse.status);
+            console.log(prNumber);
             if (createReleaseResponse.status === 201 && prNumber > 0) {
                 const new_comment = yield octokit.issues.createComment({
                     repo,
                     issue_number: prNumber,
                     body: `Tag \`${newTag}\` created.`
                 });
+                console.log(JSON.stringify(new_comment));
             }
             // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
             // core.setOutput('id', releaseId);
