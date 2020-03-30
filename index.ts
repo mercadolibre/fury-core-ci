@@ -19,6 +19,7 @@ async function run() {
         let prerelease = true
         let branch = ''
         let body = ''
+        let prNumber = 0
         if (Github.context.eventName === 'push') {
             const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
             branch = pushPayload.ref.replace('refs/heads/', '')
@@ -50,6 +51,7 @@ async function run() {
 
             branch = prPayload.pull_request.head.ref
             body = prPayload.pull_request.body
+            prNumber = prPayload.number
         }
 
         // Define tag and release name
@@ -113,6 +115,13 @@ async function run() {
         //     data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
         // } = createReleaseResponse;
         console.log(createReleaseResponse.status)
+        if (createReleaseResponse.status === 201 && prNumber > 0) {
+            const new_comment = await octokit.issues.createComment({
+                repo,
+                issue_number: prNumber,
+                body: `Tag \`${newTag}\` created.`
+            });
+        }
         // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
         // core.setOutput('id', releaseId);
         // core.setOutput('html_url', htmlUrl);
