@@ -1,6 +1,6 @@
 name: Create release candidate tag
 on:
-  pull_request
+  pull_request:
   issue_comment:
     types: [created]
 jobs:
