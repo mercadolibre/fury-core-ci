@@ -10031,6 +10031,9 @@ function run() {
                 case majorRegex.test(branch):
                     bump = `${prefix}major`;
                     break;
+                case branch === 'v1': // todo remove
+                    bump = `${prefix}minor`;
+                    break;
                 default:
                     core.warning('branch name not expected, skipping');
                     return;
