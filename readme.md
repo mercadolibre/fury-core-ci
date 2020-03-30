@@ -1,5 +1,5 @@
 # Auto tag
-when pushing to master
+when merging to master
 
 # RC
 when pushing to feature branch
