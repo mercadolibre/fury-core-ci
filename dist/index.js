@@ -9987,15 +9987,15 @@ function run() {
             const { owner, repo } = Github.context.repo;
             let prerelease = false;
             let branch = '';
-            if (Github.context.eventName === 'push') {
-                branch = Github.context.ref.replace('refs/heads/', '');
-                if (branch !== 'master') {
-                    core.info('push not to master, skipping');
-                    return;
-                }
-                // const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
-                // pushPayload.base_ref
-            }
+            // if (Github.context.eventName === 'push') {
+            //     branch = Github.context.ref.replace('refs/heads/', '')
+            //     if(branch !== 'master'){
+            //         core.info('push not to master, skipping')
+            //         return
+            //     }
+            //     // const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
+            //     // pushPayload.base_ref
+            // }
             if (Github.context.eventName === 'pull_request') {
                 prerelease = true;
                 const prPayload = Github.context.payload;
@@ -10007,11 +10007,14 @@ function run() {
                     core.info('PR is a draft, skipping');
                     return;
                 }
-                if (!['opened', 'edited', 'ready_for_review'].includes(prPayload.action)) {
+                if (!['opened', 'edited', 'ready_for_review', 'synchronize'].includes(prPayload.action)) {
                     core.info('PR action not supported, skipping');
                     return;
                 }
-                //todo closed and merged
+                // PR merged:
+                if (prPayload.action === 'closed' && prPayload.pull_request.merged) {
+                    prerelease = false;
+                }
                 branch = prPayload.pull_request.head.ref;
                 // prPayload.pull_request.body
             }
@@ -10037,17 +10040,27 @@ function run() {
                 repo,
                 per_page: 100
             });
+            let newTag = "";
             const fullReleases = tags.data.filter(tag => !semver.prerelease(tag.name));
             const firstValid = fullReleases.find(tag => semver.valid(tag.name));
-            let newTag = "";
+            let lastTag = firstValid.name;
             if (prerelease) {
-                newTag = semver.inc(firstValid.name, bump, 'rc');
+                const rcName = `rc-${branch.replace('/', '-')}`;
+                const rcs = tags.data.filter(tag => tag.name.includes(rcName));
+                if (rcs.length === 0) {
+                    // increase RC number
+                    newTag = semver.inc(rcs[0], 'prerelease');
+                }
+                else {
+                    // create RC
+                    newTag = semver.inc(lastTag, bump, rcName);
+                }
             }
             else {
-                newTag = semver.inc(firstValid.name, bump);
+                newTag = semver.inc(lastTag, bump);
             }
             const releaseName = ""; //todo
-            console.log(firstValid.name);
+            console.log(lastTag);
             console.log(newTag);
             // const createReleaseResponse = await octokit.repos.createRelease({
             //     owner,
