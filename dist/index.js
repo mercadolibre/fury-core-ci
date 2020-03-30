@@ -2290,7 +2290,7 @@ const semver = __webpack_require__(876)
 // most @actions toolkit packages have async methods
 async function run() {
     try {
-        const myToken = core.getInput('GITHUB_TOKEN');
+        const myToken = process.env['GITHUB_TOKEN']
 
         const octokit = new Github.GitHub(myToken);
         // Identify branch
