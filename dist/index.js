@@ -2291,7 +2291,7 @@ const semver = __webpack_require__(876)
 async function run() {
     try {
         const myToken = process.env['GITHUB_TOKEN']
-
+core.debug(myToken)
         const octokit = new Github.GitHub(myToken);
         // Identify branch
         let branch = core.getInput('GITHUB_REF')
