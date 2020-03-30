@@ -2,4 +2,4 @@
 when merging to master
 
 # RC
-when pushing to feature branch
+when pushing to branch with name pattern

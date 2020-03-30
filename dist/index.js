@@ -9987,6 +9987,7 @@ function run() {
             const { owner, repo } = Github.context.repo;
             let prerelease = false;
             let branch = '';
+            let body = '';
             // if (Github.context.eventName === 'push') {
             //     branch = Github.context.ref.replace('refs/heads/', '')
             //     if(branch !== 'master'){
@@ -10016,7 +10017,7 @@ function run() {
                     prerelease = false;
                 }
                 branch = prPayload.pull_request.head.ref;
-                // prPayload.pull_request.body
+                body = prPayload.pull_request.body;
             }
             // Define tag and release name
             let bump = '';
@@ -10030,6 +10031,9 @@ function run() {
                     break;
                 case majorRegex.test(branch):
                     bump = `${prefix}major`;
+                    break;
+                case branch === 'v1': // todo remove
+                    bump = `${prefix}minor`;
                     break;
                 default:
                     core.warning('branch name not expected, skipping');
@@ -10047,11 +10051,10 @@ function run() {
             if (prerelease) {
                 const rcName = `rc-${branch.replace('/', '-')}`;
                 const rcs = tags.data.filter(tag => tag.name.includes(rcName));
-                console.log(rcName);
                 console.log(rcs);
-                if (rcs.length === 0) {
+                if (rcs.length !== 0) {
                     // increase RC number
-                    newTag = semver.inc(rcs[0], 'prerelease');
+                    newTag = semver.inc(rcs[0].name, 'prerelease');
                 }
                 else {
                     // create RC
@@ -10061,24 +10064,24 @@ function run() {
             else {
                 newTag = semver.inc(lastTag, bump);
             }
-            const releaseName = ""; //todo
+            const releaseName = newTag; //todo
             console.log(lastTag);
             console.log(newTag);
-            // const createReleaseResponse = await octokit.repos.createRelease({
-            //     owner,
-            //     repo,
-            //     tag_name: newTag,
-            //     name: releaseName,
-            //     body: '',
-            //     draft: false,
-            //     prerelease
-            // });
-            // // Get the ID, html_url, and upload URL for the created Release from the response
+            const createReleaseResponse = yield octokit.repos.createRelease({
+                owner,
+                repo,
+                tag_name: newTag,
+                name: releaseName,
+                body,
+                draft: false,
+                prerelease
+            });
+            // Get the ID, html_url, and upload URL for the created Release from the response
             // const {
             //     data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
             // } = createReleaseResponse;
-            //
-            // // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
+            console.log(createReleaseResponse.status);
+            // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
             // core.setOutput('id', releaseId);
             // core.setOutput('html_url', htmlUrl);
             // core.setOutput('upload_url', uploadUrl);
