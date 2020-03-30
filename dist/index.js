@@ -2585,13 +2585,16 @@ async function run() {
         const octokit = new Github.GitHub(token);
         const {owner, repo} = Github.context.repo
 
-        console.log(JSON.stringify(Github.context.payload))
+        console.log(Github.context.eventName)
 
+        console.log(JSON.stringify(Github.context.payload))
         // if (Github.context.eventName === 'push') {
         //     const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
             // pushPayload.base_ref
             // core.info(`The head commit is: ${pushPayload.head}`)
         // }
+        // const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPullRequest
+
         // Identify branch
         let branch = Github.context.ref
         branch = branch.replace('refs/heads/', '')
@@ -2602,25 +2605,31 @@ async function run() {
         // Define tag and release name
         let bump = ''
         const fromBranch = 'fix/*'
+        const prefix = prerelease ? 'pre' : ''
         switch (fromBranch) {
             case 'fix/*':
-                bump = 'patch'
+                bump = `${prefix}patch`
                 break
             case 'feature/*':
-                bump = 'minor'
+                bump = `${prefix}minor`
                 break
             case 'release/*':
-                bump = 'major'
+                bump = `${prefix}major`
                 break
         }
-        const tags = octokit.repos.listTags({
+        const tags = await octokit.repos.listTags({
             owner,
             repo,
             per_page: 100
         });
-        console.log(JSON.stringify((await tags).data))
-        const firstValid = (await tags).data.find(tag => semver.valid(tag.name))
-        const newTag = semver.inc(firstValid.name, bump)
+        const fullReleases =  tags.data.filter(tag => semver.prerelease(tag.name))
+        const firstValid = fullReleases.find(tag => semver.valid(tag.name))
+        let newTag = ""
+        if(prerelease) {
+            newTag = semver.inc(firstValid.name, bump, 'rc')
+        } else {
+            newTag = semver.inc(firstValid.name, bump)
+        }
         const releaseName = ""//todo
         console.log(firstValid)
         console.log(newTag)
