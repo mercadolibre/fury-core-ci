@@ -2296,8 +2296,11 @@ async function run() {
 
         const octokit = new Github.GitHub(myToken);
         const {owner, repo} = Github.context.repo
+        console.log(Github.context.eventName)
+        console.log(JSON.stringify(Github.context.payload))
+        console.log(Github.context.ref)
         // Identify branch
-        let branch = core.getInput('GITHUB_REF')
+        let branch = process.env['GITHUB_REF']
         console.log(branch)
         branch = branch.replace('refs/heads/', '')
         let prerelease = true
@@ -2306,7 +2309,7 @@ async function run() {
         }
         // Define tag and release name
         let bump = ''
-        const fromBranch = ''
+        const fromBranch = 'fix/*'
         switch (fromBranch) {
             case 'fix/*':
                 bump = 'patch'
@@ -2325,7 +2328,7 @@ async function run() {
         });
         console.log(JSON.stringify((await tags).data))
         const firstValid = (await tags).data.find(tag => semver.valid(tag.name))
-        const newTag = semver.inc(firstValid, bump)
+        const newTag = semver.inc(firstValid.name, bump)
         const releaseName = ""//todo
         console.log(firstValid)
         console.log(newTag)
