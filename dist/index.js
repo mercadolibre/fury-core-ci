@@ -2293,12 +2293,12 @@ async function run() {
         const myToken = process.env['GITHUB_TOKEN']
         console.log(123)
         console.log(myToken)
-core.debug(myToken)
+
         const octokit = new Github.GitHub(myToken);
         const {owner, repo} = Github.context.repo
         // Identify branch
         let branch = core.getInput('GITHUB_REF')
-        core.debug(branch)
+        console.log(branch)
         branch = branch.replace('refs/heads/', '')
         let prerelease = true
         if (branch === 'master') {
@@ -2323,11 +2323,12 @@ core.debug(myToken)
             repo,
             per_page: 100
         });
-        core.debug(JSON.stringify((await tags).data))
+        console.log(JSON.stringify((await tags).data))
         const firstValid = (await tags).data.find(tag => semver.valid(tag.name))
         const newTag = semver.inc(firstValid, bump)
         const releaseName = ""//todo
-
+        console.log(firstValid)
+        console.log(newTag)
         //context.payload.pull_request.head.ref
         //Github.context.payload.ref
 
