@@ -10035,6 +10035,7 @@ function run() {
                     core.warning('branch name not expected, skipping');
                     return;
             }
+            console.log(bump);
             const tags = yield octokit.repos.listTags({
                 owner,
                 repo,

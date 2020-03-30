@@ -11,7 +11,7 @@ jobs:
       with:
         fetch-depth: '0'
     - name: Push RC tag
-      uses: arcticfalcon/test-actions@master
+      uses: arcticfalcon/test-actions@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         RELEASE_BRANCHES: '.*'
