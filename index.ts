@@ -117,12 +117,14 @@ async function run() {
         console.log(createReleaseResponse.status)
         console.log(prNumber)
         if (createReleaseResponse.status === 201 && prNumber > 0) {
-            const new_comment = await octokit.issues.createComment({
+            const params = {
                 repo,
                 issue_number: prNumber,
                 owner,
                 body: `Tag \`${newTag}\` created.`
-            });
+            };
+            console.log(params)
+            const new_comment = await octokit.issues.createComment(params);
             console.log(JSON.stringify(new_comment))
         }
         // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
