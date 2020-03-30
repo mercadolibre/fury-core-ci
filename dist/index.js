@@ -2291,6 +2291,8 @@ const semver = __webpack_require__(876)
 async function run() {
     try {
         const myToken = process.env['GITHUB_TOKEN']
+        console.log(123)
+        console.log(myToken)
 core.debug(myToken)
         const octokit = new Github.GitHub(myToken);
         const {owner, repo} = Github.context.repo
