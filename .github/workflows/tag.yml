@@ -11,6 +11,6 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Bump version and push tag
-        uses: mercadolibre/fury-core-actions@master
+        uses: arcticfalcon/test-actions@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
