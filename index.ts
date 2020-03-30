@@ -19,20 +19,19 @@ async function run() {
         let prerelease = false
         let branch = ''
         let body = ''
-        // if (Github.context.eventName === 'push') {
-        //     branch = Github.context.ref.replace('refs/heads/', '')
-        //     if(branch !== 'master'){
-        //         core.info('push not to master, skipping')
-        //         return
-        //     }
-        //     // const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
-        //     // pushPayload.base_ref
-        // }
-console.log(Github.context.eventName)
-        if (Github.context.eventName === 'issue_comment') {
-            console.log(JSON.stringify(Github.context.payload))
+        if (Github.context.eventName === 'push') {
+            const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
+            console.log(JSON.stringify(pushPayload))
             return
+            // branch = Github.context.ref.replace('refs/heads/', '')
+            // if(branch !== 'master'){
+            //     core.info('push not to master, skipping')
+            //     return
+            // }
+            // const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
+            // pushPayload.base_ref
         }
+
         if (Github.context.eventName === 'pull_request') {
             prerelease = true
             const prPayload = Github.context.payload as Webhooks.WebhookPayloadPullRequest

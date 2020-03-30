@@ -1,8 +1,7 @@
 name: Create release candidate tag
 on:
+  push:
   pull_request:
-  issue_comment:
-    types: [created]
 jobs:
   build:
     runs-on: ubuntu-latest
