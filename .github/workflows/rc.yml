@@ -1,6 +1,5 @@
 name: Create release candidate tag
 on:
-  push:
   pull_request:
     types: [opened, synchronize, ready_for_review, edited, closed]
 jobs:
