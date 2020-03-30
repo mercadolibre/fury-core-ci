@@ -120,6 +120,7 @@ async function run() {
             const new_comment = await octokit.issues.createComment({
                 repo,
                 issue_number: prNumber,
+                owner: 'Fury Core Actions',
                 body: `Tag \`${newTag}\` created.`
             });
             console.log(JSON.stringify(new_comment))
