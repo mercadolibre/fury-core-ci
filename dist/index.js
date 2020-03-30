@@ -9997,6 +9997,11 @@ function run() {
             //     // const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
             //     // pushPayload.base_ref
             // }
+            console.log(Github.context.eventName);
+            if (Github.context.eventName === 'issue_comment') {
+                console.log(JSON.stringify(Github.context.payload));
+                return;
+            }
             if (Github.context.eventName === 'pull_request') {
                 prerelease = true;
                 const prPayload = Github.context.payload;
@@ -10051,7 +10056,6 @@ function run() {
             if (prerelease) {
                 const rcName = `rc-${branch.replace('/', '-')}`;
                 const rcs = tags.data.filter(tag => tag.name.includes(rcName));
-                console.log(rcs);
                 if (rcs.length !== 0) {
                     // increase RC number
                     newTag = semver.inc(rcs[0].name, 'prerelease');
