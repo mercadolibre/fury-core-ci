@@ -34,10 +34,8 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(104);
+/******/ 		return __webpack_require__(731);
 /******/ 	};
-/******/ 	// initialize runtime
-/******/ 	runtime(__webpack_require__);
 /******/
 /******/ 	// run startup
 /******/ 	return startup();
@@ -91,25 +89,6 @@ Object.keys(OctokitRest).forEach(key => {
 });
 
 module.exports = Octokit;
-
-
-/***/ }),
-
-/***/ 1:
-/***/ (function(module) {
-
-module.exports = getMissingHeaders
-
-const WEBHOOK_HEADERS = [
-  'x-github-event',
-  'x-hub-signature',
-  'x-github-delivery'
-]
-
-// https://developer.github.com/webhooks/#delivery-headers
-function getMissingHeaders (request) {
-  return WEBHOOK_HEADERS.filter(header => !(header in request.headers))
-}
 
 
 /***/ }),
@@ -2293,375 +2272,10 @@ module.exports = SemVer
 
 /***/ }),
 
-/***/ 81:
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * Module dependencies.
- */
-
-const tty = __webpack_require__(867);
-const util = __webpack_require__(669);
-
-/**
- * This is the Node.js implementation of `debug()`.
- */
-
-exports.init = init;
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-
-/**
- * Colors.
- */
-
-exports.colors = [6, 2, 3, 4, 5, 1];
-
-try {
-	// Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
-	// eslint-disable-next-line import/no-extraneous-dependencies
-	const supportsColor = __webpack_require__(247);
-
-	if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
-		exports.colors = [
-			20,
-			21,
-			26,
-			27,
-			32,
-			33,
-			38,
-			39,
-			40,
-			41,
-			42,
-			43,
-			44,
-			45,
-			56,
-			57,
-			62,
-			63,
-			68,
-			69,
-			74,
-			75,
-			76,
-			77,
-			78,
-			79,
-			80,
-			81,
-			92,
-			93,
-			98,
-			99,
-			112,
-			113,
-			128,
-			129,
-			134,
-			135,
-			148,
-			149,
-			160,
-			161,
-			162,
-			163,
-			164,
-			165,
-			166,
-			167,
-			168,
-			169,
-			170,
-			171,
-			172,
-			173,
-			178,
-			179,
-			184,
-			185,
-			196,
-			197,
-			198,
-			199,
-			200,
-			201,
-			202,
-			203,
-			204,
-			205,
-			206,
-			207,
-			208,
-			209,
-			214,
-			215,
-			220,
-			221
-		];
-	}
-} catch (error) {
-	// Swallow - we only care if `supports-color` is available; it doesn't have to be.
-}
-
-/**
- * Build up the default `inspectOpts` object from the environment variables.
- *
- *   $ DEBUG_COLORS=no DEBUG_DEPTH=10 DEBUG_SHOW_HIDDEN=enabled node script.js
- */
-
-exports.inspectOpts = Object.keys(process.env).filter(key => {
-	return /^debug_/i.test(key);
-}).reduce((obj, key) => {
-	// Camel-case
-	const prop = key
-		.substring(6)
-		.toLowerCase()
-		.replace(/_([a-z])/g, (_, k) => {
-			return k.toUpperCase();
-		});
-
-	// Coerce string value into JS value
-	let val = process.env[key];
-	if (/^(yes|on|true|enabled)$/i.test(val)) {
-		val = true;
-	} else if (/^(no|off|false|disabled)$/i.test(val)) {
-		val = false;
-	} else if (val === 'null') {
-		val = null;
-	} else {
-		val = Number(val);
-	}
-
-	obj[prop] = val;
-	return obj;
-}, {});
-
-/**
- * Is stdout a TTY? Colored output is enabled when `true`.
- */
-
-function useColors() {
-	return 'colors' in exports.inspectOpts ?
-		Boolean(exports.inspectOpts.colors) :
-		tty.isatty(process.stderr.fd);
-}
-
-/**
- * Adds ANSI color escape codes if enabled.
- *
- * @api public
- */
-
-function formatArgs(args) {
-	const {namespace: name, useColors} = this;
-
-	if (useColors) {
-		const c = this.color;
-		const colorCode = '\u001B[3' + (c < 8 ? c : '8;5;' + c);
-		const prefix = `  ${colorCode};1m${name} \u001B[0m`;
-
-		args[0] = prefix + args[0].split('\n').join('\n' + prefix);
-		args.push(colorCode + 'm+' + module.exports.humanize(this.diff) + '\u001B[0m');
-	} else {
-		args[0] = getDate() + name + ' ' + args[0];
-	}
-}
-
-function getDate() {
-	if (exports.inspectOpts.hideDate) {
-		return '';
-	}
-	return new Date().toISOString() + ' ';
-}
-
-/**
- * Invokes `util.format()` with the specified arguments and writes to stderr.
- */
-
-function log(...args) {
-	return process.stderr.write(util.format(...args) + '\n');
-}
-
-/**
- * Save `namespaces`.
- *
- * @param {String} namespaces
- * @api private
- */
-function save(namespaces) {
-	if (namespaces) {
-		process.env.DEBUG = namespaces;
-	} else {
-		// If you set a process.env field to null or undefined, it gets cast to the
-		// string 'null' or 'undefined'. Just delete instead.
-		delete process.env.DEBUG;
-	}
-}
-
-/**
- * Load `namespaces`.
- *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
-
-function load() {
-	return process.env.DEBUG;
-}
-
-/**
- * Init logic for `debug` instances.
- *
- * Create a new `inspectOpts` object in case `useColors` is set
- * differently for a particular `debug` instance.
- */
-
-function init(debug) {
-	debug.inspectOpts = {};
-
-	const keys = Object.keys(exports.inspectOpts);
-	for (let i = 0; i < keys.length; i++) {
-		debug.inspectOpts[keys[i]] = exports.inspectOpts[keys[i]];
-	}
-}
-
-module.exports = __webpack_require__(486)(exports);
-
-const {formatters} = module.exports;
-
-/**
- * Map %o to `util.inspect()`, all on a single line.
- */
-
-formatters.o = function (v) {
-	this.inspectOpts.colors = this.useColors;
-	return util.inspect(v, this.inspectOpts)
-		.replace(/\s*\n\s*/g, ' ');
-};
-
-/**
- * Map %O to `util.inspect()`, allowing multiple lines if needed.
- */
-
-formatters.O = function (v) {
-	this.inspectOpts.colors = this.useColors;
-	return util.inspect(v, this.inspectOpts);
-};
-
-
-/***/ }),
-
 /***/ 87:
 /***/ (function(module) {
 
 module.exports = require("os");
-
-/***/ }),
-
-/***/ 104:
-/***/ (function(__unusedmodule, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _octokit_webhooks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(589);
-/* harmony import */ var _octokit_webhooks__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_octokit_webhooks__WEBPACK_IMPORTED_MODULE_0__);
-const core = __webpack_require__(470);
-const Github = __webpack_require__(469);
-
-const semver = __webpack_require__(876)
-
-
-// most @actions toolkit packages have async methods
-async function run() {
-    try {
-        const token = process.env['GITHUB_TOKEN']
-
-        const octokit = new Github.GitHub(token);
-        const {owner, repo} = Github.context.repo
-
-        console.log(123)
-        console.log(Github.context.eventName)
-
-        console.log(JSON.stringify(Github.context.payload))
-        // if (Github.context.eventName === 'push') {
-        //     const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
-            // pushPayload.base_ref
-            // core.info(`The head commit is: ${pushPayload.head}`)
-        // }
-        // const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPullRequest
-
-        // Identify branch
-        let branch = Github.context.ref
-        branch = branch.replace('refs/heads/', '')
-        let prerelease = true
-        if (branch === 'master') {
-            prerelease = false
-        }
-        // Define tag and release name
-        let bump = ''
-        const fromBranch = 'fix/*'
-        const prefix = prerelease ? 'pre' : ''
-        switch (fromBranch) {
-            case 'fix/*':
-                bump = `${prefix}patch`
-                break
-            case 'feature/*':
-                bump = `${prefix}minor`
-                break
-            case 'release/*':
-                bump = `${prefix}major`
-                break
-        }
-        const tags = await octokit.repos.listTags({
-            owner,
-            repo,
-            per_page: 100
-        });
-        const fullReleases =  tags.data.filter(tag => !semver.prerelease(tag.name))
-        const firstValid = fullReleases.find(tag => semver.valid(tag.name))
-        let newTag = ""
-        if(prerelease) {
-            newTag = semver.inc(firstValid.name, bump, 'rc')
-        } else {
-            newTag = semver.inc(firstValid.name, bump)
-        }
-        const releaseName = ""//todo
-        console.log(firstValid)
-        console.log(newTag)
-        //context.payload.pull_request.head.ref
-        //Github.context.payload.ref
-
-        // const createReleaseResponse = await octokit.repos.createRelease({
-        //     owner,
-        //     repo,
-        //     tag_name: newTag,
-        //     name: releaseName,
-        //     body: '',
-        //     draft: false,
-        //     prerelease
-        // });
-        // // Get the ID, html_url, and upload URL for the created Release from the response
-        // const {
-        //     data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
-        // } = createReleaseResponse;
-        //
-        // // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
-        // core.setOutput('id', releaseId);
-        // core.setOutput('html_url', htmlUrl);
-        // core.setOutput('upload_url', uploadUrl);
-    } catch (error) {
-        core.setFailed(error.message);
-    }
-}
-
-run()
-
 
 /***/ }),
 
@@ -4080,34 +3694,6 @@ module.exports = require("child_process");
 
 /***/ }),
 
-/***/ 138:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-module.exports = createEventHandler;
-
-const on = __webpack_require__(275);
-const receive = __webpack_require__(686);
-const removeListener = __webpack_require__(597);
-
-function createEventHandler(options) {
-  const state = {
-    hooks: {},
-  };
-
-  if (options && options.transform) {
-    state.transform = options.transform;
-  }
-
-  return {
-    on: on.bind(null, state),
-    removeListener: removeListener.bind(null, state),
-    receive: receive.bind(null, state),
-  };
-}
-
-
-/***/ }),
-
 /***/ 141:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -4482,45 +4068,12 @@ function paginatePlugin(octokit) {
 
 /***/ }),
 
-/***/ 153:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-module.exports = verify;
-
-const crypto = __webpack_require__(417);
-const Buffer = __webpack_require__(407).Buffer;
-
-const sign = __webpack_require__(216);
-
-function verify(secret, eventPayload, signature) {
-  if (!secret || !eventPayload || !signature) {
-    throw new TypeError("secret, eventPayload & signature required");
-  }
-
-  const signatureBuffer = Buffer.from(signature);
-  const verificationBuffer = Buffer.from(sign(secret, eventPayload));
-
-  if (signatureBuffer.length !== verificationBuffer.length) {
-    return false;
-  }
-
-  return timingSafeEqual(signatureBuffer, verificationBuffer);
-}
-
-/* istanbul ignore next */
-function timingSafeEqual(signatureBuffer, verificationBuffer) {
-  return crypto.timingSafeEqual(signatureBuffer, verificationBuffer);
-}
-
-
-/***/ }),
-
 /***/ 164:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const SemVer = __webpack_require__(65)
 const Range = __webpack_require__(124)
-const gt = __webpack_require__(291)
+const gt = __webpack_require__(486)
 
 const minVersion = (range, loose) => {
   range = new Range(range, loose)
@@ -4976,34 +4529,6 @@ module.exports = {"name":"@octokit/rest","version":"16.43.1","publishConfig":{"a
 
 /***/ }),
 
-/***/ 216:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-module.exports = sign;
-
-const crypto = __webpack_require__(417);
-
-function sign(secret, payload) {
-  if (!secret || !payload) {
-    throw new TypeError("secret & payload required");
-  }
-
-  payload =
-    typeof payload === "string" ? payload : toNormalizedJsonString(payload);
-  return (
-    "sha1=" + crypto.createHmac("sha1", secret).update(payload).digest("hex")
-  );
-}
-
-function toNormalizedJsonString(payload) {
-  return JSON.stringify(payload).replace(/[^\\]\\u[\da-f]{4}/g, (s) => {
-    return s.substr(0, 3) + s.substr(3).toUpperCase();
-  });
-}
-
-
-/***/ }),
-
 /***/ 219:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -5015,152 +4540,6 @@ const toComparators = (range, options) =>
     .map(comp => comp.map(c => c.value).join(' ').trim().split(' '))
 
 module.exports = toComparators
-
-
-/***/ }),
-
-/***/ 247:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const os = __webpack_require__(87);
-const hasFlag = __webpack_require__(364);
-
-const {env} = process;
-
-let forceColor;
-if (hasFlag('no-color') ||
-	hasFlag('no-colors') ||
-	hasFlag('color=false') ||
-	hasFlag('color=never')) {
-	forceColor = 0;
-} else if (hasFlag('color') ||
-	hasFlag('colors') ||
-	hasFlag('color=true') ||
-	hasFlag('color=always')) {
-	forceColor = 1;
-}
-if ('FORCE_COLOR' in env) {
-	if (env.FORCE_COLOR === true || env.FORCE_COLOR === 'true') {
-		forceColor = 1;
-	} else if (env.FORCE_COLOR === false || env.FORCE_COLOR === 'false') {
-		forceColor = 0;
-	} else {
-		forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
-	}
-}
-
-function translateLevel(level) {
-	if (level === 0) {
-		return false;
-	}
-
-	return {
-		level,
-		hasBasic: true,
-		has256: level >= 2,
-		has16m: level >= 3
-	};
-}
-
-function supportsColor(stream) {
-	if (forceColor === 0) {
-		return 0;
-	}
-
-	if (hasFlag('color=16m') ||
-		hasFlag('color=full') ||
-		hasFlag('color=truecolor')) {
-		return 3;
-	}
-
-	if (hasFlag('color=256')) {
-		return 2;
-	}
-
-	if (stream && !stream.isTTY && forceColor === undefined) {
-		return 0;
-	}
-
-	const min = forceColor || 0;
-
-	if (env.TERM === 'dumb') {
-		return min;
-	}
-
-	if (process.platform === 'win32') {
-		// Node.js 7.5.0 is the first version of Node.js to include a patch to
-		// libuv that enables 256 color output on Windows. Anything earlier and it
-		// won't work. However, here we target Node.js 8 at minimum as it is an LTS
-		// release, and Node.js 7 is not. Windows 10 build 10586 is the first Windows
-		// release that supports 256 colors. Windows 10 build 14931 is the first release
-		// that supports 16m/TrueColor.
-		const osRelease = os.release().split('.');
-		if (
-			Number(process.versions.node.split('.')[0]) >= 8 &&
-			Number(osRelease[0]) >= 10 &&
-			Number(osRelease[2]) >= 10586
-		) {
-			return Number(osRelease[2]) >= 14931 ? 3 : 2;
-		}
-
-		return 1;
-	}
-
-	if ('CI' in env) {
-		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
-			return 1;
-		}
-
-		return min;
-	}
-
-	if ('TEAMCITY_VERSION' in env) {
-		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
-	}
-
-	if (env.COLORTERM === 'truecolor') {
-		return 3;
-	}
-
-	if ('TERM_PROGRAM' in env) {
-		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
-
-		switch (env.TERM_PROGRAM) {
-			case 'iTerm.app':
-				return version >= 3 ? 3 : 2;
-			case 'Apple_Terminal':
-				return 2;
-			// No default
-		}
-	}
-
-	if (/-256(color)?$/i.test(env.TERM)) {
-		return 2;
-	}
-
-	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
-		return 1;
-	}
-
-	if ('COLORTERM' in env) {
-		return 1;
-	}
-
-	return min;
-}
-
-function getSupportLevel(stream) {
-	const level = supportsColor(stream);
-	return translateLevel(level);
-}
-
-module.exports = {
-	supportsColor: getSupportLevel,
-	stdout: getSupportLevel(process.stdout),
-	stderr: getSupportLevel(process.stderr)
-};
 
 
 /***/ }),
@@ -5510,37 +4889,6 @@ function applyAcceptHeader (res, headers) {
 
 /***/ }),
 
-/***/ 275:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-module.exports = receiverOn;
-
-const webhookNames = __webpack_require__(782);
-
-function receiverOn(state, webhookNameOrNames, handler) {
-  if (Array.isArray(webhookNameOrNames)) {
-    webhookNameOrNames.forEach((webhookName) =>
-      receiverOn(state, webhookName, handler)
-    );
-    return;
-  }
-
-  if (webhookNames.indexOf(webhookNameOrNames) === -1) {
-    console.warn(
-      `"${webhookNameOrNames}" is not a known webhook name (https://developer.github.com/v3/activity/events/types/)`
-    );
-  }
-
-  if (!state.hooks[webhookNameOrNames]) {
-    state.hooks[webhookNameOrNames] = [];
-  }
-
-  state.hooks[webhookNameOrNames].push(handler);
-}
-
-
-/***/ }),
-
 /***/ 280:
 /***/ (function(module) {
 
@@ -5582,16 +4930,6 @@ function register (state, name, method, options) {
 const compare = __webpack_require__(874)
 const compareLoose = (a, b) => compare(a, b, true)
 module.exports = compareLoose
-
-
-/***/ }),
-
-/***/ 291:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const compare = __webpack_require__(874)
-const gt = (a, b, loose) => compare(a, b, loose) > 0
-module.exports = gt
 
 
 /***/ }),
@@ -5959,175 +5297,6 @@ module.exports = satisfies
 
 /***/ }),
 
-/***/ 317:
-/***/ (function(module) {
-
-/**
- * Helpers.
- */
-
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var w = d * 7;
-var y = d * 365.25;
-
-/**
- * Parse or format the given `val`.
- *
- * Options:
- *
- *  - `long` verbose formatting [false]
- *
- * @param {String|Number} val
- * @param {Object} [options]
- * @throws {Error} throw an error if val is not a non-empty string or a number
- * @return {String|Number}
- * @api public
- */
-
-module.exports = function(val, options) {
-  options = options || {};
-  var type = typeof val;
-  if (type === 'string' && val.length > 0) {
-    return parse(val);
-  } else if (type === 'number' && isFinite(val)) {
-    return options.long ? fmtLong(val) : fmtShort(val);
-  }
-  throw new Error(
-    'val is not a non-empty string or a valid number. val=' +
-      JSON.stringify(val)
-  );
-};
-
-/**
- * Parse the given `str` and return milliseconds.
- *
- * @param {String} str
- * @return {Number}
- * @api private
- */
-
-function parse(str) {
-  str = String(str);
-  if (str.length > 100) {
-    return;
-  }
-  var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
-    str
-  );
-  if (!match) {
-    return;
-  }
-  var n = parseFloat(match[1]);
-  var type = (match[2] || 'ms').toLowerCase();
-  switch (type) {
-    case 'years':
-    case 'year':
-    case 'yrs':
-    case 'yr':
-    case 'y':
-      return n * y;
-    case 'weeks':
-    case 'week':
-    case 'w':
-      return n * w;
-    case 'days':
-    case 'day':
-    case 'd':
-      return n * d;
-    case 'hours':
-    case 'hour':
-    case 'hrs':
-    case 'hr':
-    case 'h':
-      return n * h;
-    case 'minutes':
-    case 'minute':
-    case 'mins':
-    case 'min':
-    case 'm':
-      return n * m;
-    case 'seconds':
-    case 'second':
-    case 'secs':
-    case 'sec':
-    case 's':
-      return n * s;
-    case 'milliseconds':
-    case 'millisecond':
-    case 'msecs':
-    case 'msec':
-    case 'ms':
-      return n;
-    default:
-      return undefined;
-  }
-}
-
-/**
- * Short format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function fmtShort(ms) {
-  var msAbs = Math.abs(ms);
-  if (msAbs >= d) {
-    return Math.round(ms / d) + 'd';
-  }
-  if (msAbs >= h) {
-    return Math.round(ms / h) + 'h';
-  }
-  if (msAbs >= m) {
-    return Math.round(ms / m) + 'm';
-  }
-  if (msAbs >= s) {
-    return Math.round(ms / s) + 's';
-  }
-  return ms + 'ms';
-}
-
-/**
- * Long format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function fmtLong(ms) {
-  var msAbs = Math.abs(ms);
-  if (msAbs >= d) {
-    return plural(ms, msAbs, d, 'day');
-  }
-  if (msAbs >= h) {
-    return plural(ms, msAbs, h, 'hour');
-  }
-  if (msAbs >= m) {
-    return plural(ms, msAbs, m, 'minute');
-  }
-  if (msAbs >= s) {
-    return plural(ms, msAbs, s, 'second');
-  }
-  return ms + ' ms';
-}
-
-/**
- * Pluralization helper.
- */
-
-function plural(ms, msAbs, n, name) {
-  var isPlural = msAbs >= n * 1.5;
-  return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
-}
-
-
-/***/ }),
-
 /***/ 323:
 /***/ (function(module) {
 
@@ -6153,38 +5322,6 @@ isStream.duplex = function (stream) {
 isStream.transform = function (stream) {
 	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
 };
-
-
-/***/ }),
-
-/***/ 328:
-/***/ (function(module) {
-
-"use strict";
-
-
-module.exports = wrapErrorHandler;
-
-// Errors thrown or rejected Promises in "error" event handlers are not handled
-// as they are in the webhook event handlers. If errors occur, we log a
-// "Fatal: Error occured" message to stdout
-function wrapErrorHandler(handler, error) {
-  let returnValue;
-
-  try {
-    returnValue = handler(error);
-  } catch (error) {
-    console.log('FATAL: Error occured in "error" event handler');
-    console.log(error);
-  }
-
-  if (returnValue && returnValue.catch) {
-    returnValue.catch((error) => {
-      console.log('FATAL: Error occured in "error" event handler');
-      console.log(error);
-    });
-  }
-}
 
 
 /***/ }),
@@ -6430,22 +5567,6 @@ function authenticationRequestError(state, error, options) {
 /***/ (function(module) {
 
 module.exports = require("assert");
-
-/***/ }),
-
-/***/ 364:
-/***/ (function(module) {
-
-"use strict";
-
-module.exports = (flag, argv) => {
-	argv = argv || process.argv;
-	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
-	const pos = argv.indexOf(prefix + flag);
-	const terminatorPos = argv.indexOf('--');
-	return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
-};
-
 
 /***/ }),
 
@@ -6941,24 +6062,10 @@ function Octokit(plugins, options) {
 
 /***/ }),
 
-/***/ 407:
-/***/ (function(module) {
-
-module.exports = require("buffer");
-
-/***/ }),
-
 /***/ 413:
 /***/ (function(module) {
 
 module.exports = require("stream");
-
-/***/ }),
-
-/***/ 417:
-/***/ (function(module) {
-
-module.exports = require("crypto");
 
 /***/ }),
 
@@ -9372,272 +8479,9 @@ module.exports = validRange
 /***/ 486:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-
-/**
- * This is the common logic for both the Node.js and web browser
- * implementations of `debug()`.
- */
-
-function setup(env) {
-	createDebug.debug = createDebug;
-	createDebug.default = createDebug;
-	createDebug.coerce = coerce;
-	createDebug.disable = disable;
-	createDebug.enable = enable;
-	createDebug.enabled = enabled;
-	createDebug.humanize = __webpack_require__(317);
-
-	Object.keys(env).forEach(key => {
-		createDebug[key] = env[key];
-	});
-
-	/**
-	* Active `debug` instances.
-	*/
-	createDebug.instances = [];
-
-	/**
-	* The currently active debug mode names, and names to skip.
-	*/
-
-	createDebug.names = [];
-	createDebug.skips = [];
-
-	/**
-	* Map of special "%n" handling functions, for the debug "format" argument.
-	*
-	* Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
-	*/
-	createDebug.formatters = {};
-
-	/**
-	* Selects a color for a debug namespace
-	* @param {String} namespace The namespace string for the for the debug instance to be colored
-	* @return {Number|String} An ANSI color code for the given namespace
-	* @api private
-	*/
-	function selectColor(namespace) {
-		let hash = 0;
-
-		for (let i = 0; i < namespace.length; i++) {
-			hash = ((hash << 5) - hash) + namespace.charCodeAt(i);
-			hash |= 0; // Convert to 32bit integer
-		}
-
-		return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
-	}
-	createDebug.selectColor = selectColor;
-
-	/**
-	* Create a debugger with the given `namespace`.
-	*
-	* @param {String} namespace
-	* @return {Function}
-	* @api public
-	*/
-	function createDebug(namespace) {
-		let prevTime;
-
-		function debug(...args) {
-			// Disabled?
-			if (!debug.enabled) {
-				return;
-			}
-
-			const self = debug;
-
-			// Set `diff` timestamp
-			const curr = Number(new Date());
-			const ms = curr - (prevTime || curr);
-			self.diff = ms;
-			self.prev = prevTime;
-			self.curr = curr;
-			prevTime = curr;
-
-			args[0] = createDebug.coerce(args[0]);
-
-			if (typeof args[0] !== 'string') {
-				// Anything else let's inspect with %O
-				args.unshift('%O');
-			}
-
-			// Apply any `formatters` transformations
-			let index = 0;
-			args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
-				// If we encounter an escaped % then don't increase the array index
-				if (match === '%%') {
-					return match;
-				}
-				index++;
-				const formatter = createDebug.formatters[format];
-				if (typeof formatter === 'function') {
-					const val = args[index];
-					match = formatter.call(self, val);
-
-					// Now we need to remove `args[index]` since it's inlined in the `format`
-					args.splice(index, 1);
-					index--;
-				}
-				return match;
-			});
-
-			// Apply env-specific formatting (colors, etc.)
-			createDebug.formatArgs.call(self, args);
-
-			const logFn = self.log || createDebug.log;
-			logFn.apply(self, args);
-		}
-
-		debug.namespace = namespace;
-		debug.enabled = createDebug.enabled(namespace);
-		debug.useColors = createDebug.useColors();
-		debug.color = selectColor(namespace);
-		debug.destroy = destroy;
-		debug.extend = extend;
-		// Debug.formatArgs = formatArgs;
-		// debug.rawLog = rawLog;
-
-		// env-specific initialization logic for debug instances
-		if (typeof createDebug.init === 'function') {
-			createDebug.init(debug);
-		}
-
-		createDebug.instances.push(debug);
-
-		return debug;
-	}
-
-	function destroy() {
-		const index = createDebug.instances.indexOf(this);
-		if (index !== -1) {
-			createDebug.instances.splice(index, 1);
-			return true;
-		}
-		return false;
-	}
-
-	function extend(namespace, delimiter) {
-		const newDebug = createDebug(this.namespace + (typeof delimiter === 'undefined' ? ':' : delimiter) + namespace);
-		newDebug.log = this.log;
-		return newDebug;
-	}
-
-	/**
-	* Enables a debug mode by namespaces. This can include modes
-	* separated by a colon and wildcards.
-	*
-	* @param {String} namespaces
-	* @api public
-	*/
-	function enable(namespaces) {
-		createDebug.save(namespaces);
-
-		createDebug.names = [];
-		createDebug.skips = [];
-
-		let i;
-		const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
-		const len = split.length;
-
-		for (i = 0; i < len; i++) {
-			if (!split[i]) {
-				// ignore empty strings
-				continue;
-			}
-
-			namespaces = split[i].replace(/\*/g, '.*?');
-
-			if (namespaces[0] === '-') {
-				createDebug.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-			} else {
-				createDebug.names.push(new RegExp('^' + namespaces + '$'));
-			}
-		}
-
-		for (i = 0; i < createDebug.instances.length; i++) {
-			const instance = createDebug.instances[i];
-			instance.enabled = createDebug.enabled(instance.namespace);
-		}
-	}
-
-	/**
-	* Disable debug output.
-	*
-	* @return {String} namespaces
-	* @api public
-	*/
-	function disable() {
-		const namespaces = [
-			...createDebug.names.map(toNamespace),
-			...createDebug.skips.map(toNamespace).map(namespace => '-' + namespace)
-		].join(',');
-		createDebug.enable('');
-		return namespaces;
-	}
-
-	/**
-	* Returns true if the given mode name is enabled, false otherwise.
-	*
-	* @param {String} name
-	* @return {Boolean}
-	* @api public
-	*/
-	function enabled(name) {
-		if (name[name.length - 1] === '*') {
-			return true;
-		}
-
-		let i;
-		let len;
-
-		for (i = 0, len = createDebug.skips.length; i < len; i++) {
-			if (createDebug.skips[i].test(name)) {
-				return false;
-			}
-		}
-
-		for (i = 0, len = createDebug.names.length; i < len; i++) {
-			if (createDebug.names[i].test(name)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	* Convert regexp to namespace
-	*
-	* @param {RegExp} regxep
-	* @return {String} namespace
-	* @api private
-	*/
-	function toNamespace(regexp) {
-		return regexp.toString()
-			.substring(2, regexp.toString().length - 2)
-			.replace(/\.\*\?$/, '*');
-	}
-
-	/**
-	* Coerce `val`.
-	*
-	* @param {Mixed} val
-	* @return {Mixed}
-	* @api private
-	*/
-	function coerce(val) {
-		if (val instanceof Error) {
-			return val.stack || val.message;
-		}
-		return val;
-	}
-
-	createDebug.enable(createDebug.load());
-
-	return createDebug;
-}
-
-module.exports = setup;
+const compare = __webpack_require__(874)
+const gt = (a, b, loose) => compare(a, b, loose) > 0
+module.exports = gt
 
 
 /***/ }),
@@ -10725,81 +9569,12 @@ module.exports = lt
 
 /***/ }),
 
-/***/ 589:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-module.exports = createWebhooksApi;
-
-const createEventHandler = __webpack_require__(138);
-const middleware = __webpack_require__(868);
-const sign = __webpack_require__(216);
-const verify = __webpack_require__(153);
-const verifyAndReceive = __webpack_require__(958);
-
-function createWebhooksApi(options) {
-  if (!options || !options.secret) {
-    throw new Error("options.secret required");
-  }
-
-  const state = {
-    eventHandler: createEventHandler(options),
-    path: options.path || "/",
-    secret: options.secret,
-  };
-
-  return {
-    sign: sign.bind(null, options.secret),
-    verify: verify.bind(null, options.secret),
-    on: state.eventHandler.on,
-    removeListener: state.eventHandler.removeListener,
-    receive: state.eventHandler.receive,
-    middleware: middleware.bind(null, state),
-    verifyAndReceive: verifyAndReceive.bind(null, state),
-  };
-}
-
-
-/***/ }),
-
 /***/ 593:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const compareBuild = __webpack_require__(465)
 const rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose))
 module.exports = rsort
-
-
-/***/ }),
-
-/***/ 597:
-/***/ (function(module) {
-
-"use strict";
-
-
-module.exports = receiverListener;
-
-function receiverListener(state, webhookNameOrNames, handler) {
-  if (Array.isArray(webhookNameOrNames)) {
-    webhookNameOrNames.forEach((webhookName) =>
-      receiverListener(state, webhookName, handler)
-    );
-    return;
-  }
-
-  if (!state.hooks[webhookNameOrNames]) {
-    return;
-  }
-
-  // remove last hook that has been added, that way
-  // it behaves the same as removeListener
-  for (let i = state.hooks[webhookNameOrNames].length - 1; i >= 0; i--) {
-    if (state.hooks[webhookNameOrNames][i] === handler) {
-      state.hooks[webhookNameOrNames].splice(i, 1);
-      return;
-    }
-  }
-}
 
 
 /***/ }),
@@ -10940,39 +9715,6 @@ const debug = (
   : () => {}
 
 module.exports = debug
-
-
-/***/ }),
-
-/***/ 629:
-/***/ (function(module) {
-
-module.exports = getPayload
-
-function getPayload (request) {
-  // If request.body already exists we can stop here
-  // See https://github.com/octokit/webhooks.js/pull/23
-  if (request.body) {
-    return Promise.resolve(request.body)
-  }
-
-  return new Promise((resolve, reject) => {
-    const dataChunks = []
-
-    request.on('error', reject)
-    request.on('data', (chunk) => dataChunks.push(chunk))
-    request.on('end', () => {
-      const data = Buffer.concat(dataChunks).toString()
-      try {
-        resolve(JSON.parse(data))
-      } catch (error) {
-        error.message = 'Invalid JSON'
-        error.status = 400
-        reject(error)
-      }
-    })
-  })
-}
 
 
 /***/ }),
@@ -11154,82 +9896,6 @@ module.exports = patch
 
 /***/ }),
 
-/***/ 686:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = receiverHandle;
-
-const wrapErrorHandler = __webpack_require__(328);
-
-// main handler function
-function receiverHandle(state, event) {
-  const errorHandlers = state.hooks.error || [];
-
-  if (event instanceof Error) {
-    errorHandlers.forEach((handler) => wrapErrorHandler(handler, event));
-
-    return Promise.reject(event);
-  }
-
-  if (!event || !event.name) {
-    throw new Error("Event name not passed");
-  }
-
-  if (!event.payload) {
-    throw new Error("Event payload not passed");
-  }
-
-  // flatten arrays of event listeners and remove undefined values
-  const hooks = []
-    .concat(
-      state.hooks[`${event.name}.${event.payload.action}`],
-      state.hooks[event.name],
-      state.hooks["*"]
-    )
-    .filter(Boolean);
-
-  if (hooks.length === 0) {
-    return Promise.resolve();
-  }
-
-  const errors = [];
-  const promises = hooks.map((handler) => {
-    let promise = Promise.resolve(event);
-
-    if (state.transform) {
-      promise = promise.then(state.transform);
-    }
-
-    return promise
-      .then((event) => {
-        return handler(event);
-      })
-
-      .catch((error) => errors.push(Object.assign(error, { event })));
-  });
-
-  return Promise.all(promises).then(() => {
-    if (errors.length === 0) {
-      return;
-    }
-
-    errorHandlers.forEach((handler) =>
-      errors.forEach(wrapErrorHandler.bind(null, handler))
-    );
-
-    const error = new Error("Webhook handler error");
-    error.errors = errors;
-
-    throw error;
-  });
-}
-
-
-/***/ }),
-
 /***/ 692:
 /***/ (function(__unusedmodule, exports) {
 
@@ -11290,6 +9956,124 @@ const valid = (version, options) => {
   return v ? v.version : null
 }
 module.exports = valid
+
+
+/***/ }),
+
+/***/ 731:
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+const core = __webpack_require__(470);
+const Github = __webpack_require__(469);
+// const Webhooks = require("@octokit/webhooks");
+const semver = __webpack_require__(876);
+const patchRegex = /fix\/*/;
+const minorRegex = /feature\/*/;
+const majorRegex = /release\/*/;
+// most @actions toolkit packages have async methods
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const token = process.env['GITHUB_TOKEN'];
+            const octokit = new Github.GitHub(token);
+            const { owner, repo } = Github.context.repo;
+            let prerelease = false;
+            let branch = '';
+            if (Github.context.eventName === 'push') {
+                branch = Github.context.ref.replace('refs/heads/', '');
+                if (branch !== 'master') {
+                    core.info('push not to master, skipping');
+                    return;
+                }
+                // const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
+                // pushPayload.base_ref
+            }
+            if (Github.context.eventName === 'pull_request') {
+                prerelease = true;
+                const prPayload = Github.context.payload;
+                if (prPayload.pull_request.base.ref !== 'master') {
+                    core.info('PR not to master, skipping');
+                    return;
+                }
+                if (prPayload.pull_request.draft) {
+                    core.info('PR is a draft, skipping');
+                    return;
+                }
+                if (!['opened', 'edited', 'ready_for_review'].includes(prPayload.action)) {
+                    core.info('PR action not supported, skipping');
+                    return;
+                }
+                //todo closed and merged
+                branch = prPayload.pull_request.head.ref;
+                // prPayload.pull_request.body
+            }
+            // Define tag and release name
+            let bump = '';
+            const prefix = prerelease ? 'pre' : '';
+            switch (true) {
+                case patchRegex.test(branch):
+                    bump = `${prefix}patch`;
+                    break;
+                case minorRegex.test(branch):
+                    bump = `${prefix}minor`;
+                    break;
+                case majorRegex.test(branch):
+                    bump = `${prefix}major`;
+                    break;
+                default:
+                    core.warning('branch name not expected, skipping');
+                    return;
+            }
+            const tags = yield octokit.repos.listTags({
+                owner,
+                repo,
+                per_page: 100
+            });
+            const fullReleases = tags.data.filter(tag => !semver.prerelease(tag.name));
+            const firstValid = fullReleases.find(tag => semver.valid(tag.name));
+            let newTag = "";
+            if (prerelease) {
+                newTag = semver.inc(firstValid.name, bump, 'rc');
+            }
+            else {
+                newTag = semver.inc(firstValid.name, bump);
+            }
+            const releaseName = ""; //todo
+            console.log(firstValid.name);
+            console.log(newTag);
+            // const createReleaseResponse = await octokit.repos.createRelease({
+            //     owner,
+            //     repo,
+            //     tag_name: newTag,
+            //     name: releaseName,
+            //     body: '',
+            //     draft: false,
+            //     prerelease
+            // });
+            // // Get the ID, html_url, and upload URL for the created Release from the response
+            // const {
+            //     data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
+            // } = createReleaseResponse;
+            //
+            // // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
+            // core.setOutput('id', releaseId);
+            // core.setOutput('html_url', htmlUrl);
+            // core.setOutput('upload_url', uploadUrl);
+        }
+        catch (error) {
+            core.setFailed(error.message);
+        }
+    });
+}
+run();
 
 
 /***/ }),
@@ -11411,7 +10195,7 @@ module.exports = require("fs");
 
 const eq = __webpack_require__(298)
 const neq = __webpack_require__(873)
-const gt = __webpack_require__(291)
+const gt = __webpack_require__(486)
 const gte = __webpack_require__(167)
 const lt = __webpack_require__(586)
 const lte = __webpack_require__(444)
@@ -11723,7 +10507,7 @@ const Comparator = __webpack_require__(174)
 const {ANY} = Comparator
 const Range = __webpack_require__(124)
 const satisfies = __webpack_require__(310)
-const gt = __webpack_require__(291)
+const gt = __webpack_require__(486)
 const lt = __webpack_require__(586)
 const lte = __webpack_require__(444)
 const gte = __webpack_require__(167)
@@ -11802,30 +10586,6 @@ module.exports = outside
 
 /***/ }),
 
-/***/ 782:
-/***/ (function(module) {
-
-module.exports = ["*","check_run","check_run.completed","check_run.created","check_run.requested_action","check_run.rerequested","check_suite","check_suite.completed","check_suite.requested","check_suite.rerequested","commit_comment","commit_comment.created","content_reference","create","delete","deploy_key","deploy_key.created","deploy_key.deleted","deployment","deployment.created","deployment_status","deployment_status.created","error","fork","github_app_authorization","gollum","installation","installation.created","installation.deleted","installation.new_permissions_accepted","installation_repositories","installation_repositories.added","installation_repositories.removed","issue_comment","issue_comment.created","issue_comment.deleted","issue_comment.edited","issues","issues.assigned","issues.closed","issues.deleted","issues.demilestoned","issues.edited","issues.labeled","issues.locked","issues.milestoned","issues.opened","issues.pinned","issues.reopened","issues.transferred","issues.unassigned","issues.unlabeled","issues.unlocked","issues.unpinned","label","label.created","label.deleted","label.edited","marketplace_purchase","marketplace_purchase.cancelled","marketplace_purchase.changed","marketplace_purchase.pending_change","marketplace_purchase.pending_change_cancelled","marketplace_purchase.purchased","member","member.added","member.deleted","member.edited","membership","membership.added","membership.removed","meta","meta.deleted","milestone","milestone.closed","milestone.created","milestone.deleted","milestone.edited","milestone.opened","org_block","org_block.blocked","org_block.unblocked","organization","organization.deleted","organization.member_added","organization.member_invited","organization.member_removed","organization.renamed","package","package.published","package.updated","page_build","ping","project","project.closed","project.created","project.deleted","project.edited","project.reopened","project_card","project_card.converted","project_card.created","project_card.deleted","project_card.edited","project_card.moved","project_column","project_column.created","project_column.deleted","project_column.edited","project_column.moved","public","pull_request","pull_request.assigned","pull_request.closed","pull_request.edited","pull_request.labeled","pull_request.locked","pull_request.opened","pull_request.ready_for_review","pull_request.reopened","pull_request.review_request_removed","pull_request.review_requested","pull_request.synchronize","pull_request.unassigned","pull_request.unlabeled","pull_request.unlocked","pull_request_review","pull_request_review.dismissed","pull_request_review.edited","pull_request_review.submitted","pull_request_review_comment","pull_request_review_comment.created","pull_request_review_comment.deleted","pull_request_review_comment.edited","push","release","release.created","release.deleted","release.edited","release.prereleased","release.published","release.unpublished","repository","repository.archived","repository.created","repository.deleted","repository.edited","repository.privatized","repository.publicized","repository.renamed","repository.transferred","repository.unarchived","repository_dispatch","repository_import","repository_vulnerability_alert","repository_vulnerability_alert.create","repository_vulnerability_alert.dismiss","repository_vulnerability_alert.resolve","security_advisory","security_advisory.performed","security_advisory.published","security_advisory.updated","sponsorship","star","star.created","star.deleted","status","team","team.added_to_repository","team.created","team.deleted","team.edited","team.removed_from_repository","team_add","watch","watch.started"];
-
-/***/ }),
-
-/***/ 784:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-/**
- * Detect Electron renderer / nwjs process, which is node, but we should
- * treat as a browser.
- */
-
-if (typeof process === 'undefined' || process.type === 'renderer' || process.browser === true || process.__nwjs) {
-	module.exports = __webpack_require__(794);
-} else {
-	module.exports = __webpack_require__(81);
-}
-
-
-/***/ }),
-
 /***/ 790:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -11833,277 +10593,6 @@ const outside = __webpack_require__(781)
 // Determine if version is less than all the versions possible in the range
 const ltr = (version, range, options) => outside(version, range, '<', options)
 module.exports = ltr
-
-
-/***/ }),
-
-/***/ 794:
-/***/ (function(module, exports, __webpack_require__) {
-
-/* eslint-env browser */
-
-/**
- * This is the web browser implementation of `debug()`.
- */
-
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-exports.storage = localstorage();
-
-/**
- * Colors.
- */
-
-exports.colors = [
-	'#0000CC',
-	'#0000FF',
-	'#0033CC',
-	'#0033FF',
-	'#0066CC',
-	'#0066FF',
-	'#0099CC',
-	'#0099FF',
-	'#00CC00',
-	'#00CC33',
-	'#00CC66',
-	'#00CC99',
-	'#00CCCC',
-	'#00CCFF',
-	'#3300CC',
-	'#3300FF',
-	'#3333CC',
-	'#3333FF',
-	'#3366CC',
-	'#3366FF',
-	'#3399CC',
-	'#3399FF',
-	'#33CC00',
-	'#33CC33',
-	'#33CC66',
-	'#33CC99',
-	'#33CCCC',
-	'#33CCFF',
-	'#6600CC',
-	'#6600FF',
-	'#6633CC',
-	'#6633FF',
-	'#66CC00',
-	'#66CC33',
-	'#9900CC',
-	'#9900FF',
-	'#9933CC',
-	'#9933FF',
-	'#99CC00',
-	'#99CC33',
-	'#CC0000',
-	'#CC0033',
-	'#CC0066',
-	'#CC0099',
-	'#CC00CC',
-	'#CC00FF',
-	'#CC3300',
-	'#CC3333',
-	'#CC3366',
-	'#CC3399',
-	'#CC33CC',
-	'#CC33FF',
-	'#CC6600',
-	'#CC6633',
-	'#CC9900',
-	'#CC9933',
-	'#CCCC00',
-	'#CCCC33',
-	'#FF0000',
-	'#FF0033',
-	'#FF0066',
-	'#FF0099',
-	'#FF00CC',
-	'#FF00FF',
-	'#FF3300',
-	'#FF3333',
-	'#FF3366',
-	'#FF3399',
-	'#FF33CC',
-	'#FF33FF',
-	'#FF6600',
-	'#FF6633',
-	'#FF9900',
-	'#FF9933',
-	'#FFCC00',
-	'#FFCC33'
-];
-
-/**
- * Currently only WebKit-based Web Inspectors, Firefox >= v31,
- * and the Firebug extension (any Firefox version) are known
- * to support "%c" CSS customizations.
- *
- * TODO: add a `localStorage` variable to explicitly enable/disable colors
- */
-
-// eslint-disable-next-line complexity
-function useColors() {
-	// NB: In an Electron preload script, document will be defined but not fully
-	// initialized. Since we know we're in Chrome, we'll just detect this case
-	// explicitly
-	if (typeof window !== 'undefined' && window.process && (window.process.type === 'renderer' || window.process.__nwjs)) {
-		return true;
-	}
-
-	// Internet Explorer and Edge do not support colors.
-	if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
-		return false;
-	}
-
-	// Is webkit? http://stackoverflow.com/a/16459606/376773
-	// document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-	return (typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance) ||
-		// Is firebug? http://stackoverflow.com/a/398120/376773
-		(typeof window !== 'undefined' && window.console && (window.console.firebug || (window.console.exception && window.console.table))) ||
-		// Is firefox >= v31?
-		// https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-		(typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31) ||
-		// Double check webkit in userAgent just in case we are in a worker
-		(typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/));
-}
-
-/**
- * Colorize log arguments if enabled.
- *
- * @api public
- */
-
-function formatArgs(args) {
-	args[0] = (this.useColors ? '%c' : '') +
-		this.namespace +
-		(this.useColors ? ' %c' : ' ') +
-		args[0] +
-		(this.useColors ? '%c ' : ' ') +
-		'+' + module.exports.humanize(this.diff);
-
-	if (!this.useColors) {
-		return;
-	}
-
-	const c = 'color: ' + this.color;
-	args.splice(1, 0, c, 'color: inherit');
-
-	// The final "%c" is somewhat tricky, because there could be other
-	// arguments passed either before or after the %c, so we need to
-	// figure out the correct index to insert the CSS into
-	let index = 0;
-	let lastC = 0;
-	args[0].replace(/%[a-zA-Z%]/g, match => {
-		if (match === '%%') {
-			return;
-		}
-		index++;
-		if (match === '%c') {
-			// We only are interested in the *last* %c
-			// (the user may have provided their own)
-			lastC = index;
-		}
-	});
-
-	args.splice(lastC, 0, c);
-}
-
-/**
- * Invokes `console.log()` when available.
- * No-op when `console.log` is not a "function".
- *
- * @api public
- */
-function log(...args) {
-	// This hackery is required for IE8/9, where
-	// the `console.log` function doesn't have 'apply'
-	return typeof console === 'object' &&
-		console.log &&
-		console.log(...args);
-}
-
-/**
- * Save `namespaces`.
- *
- * @param {String} namespaces
- * @api private
- */
-function save(namespaces) {
-	try {
-		if (namespaces) {
-			exports.storage.setItem('debug', namespaces);
-		} else {
-			exports.storage.removeItem('debug');
-		}
-	} catch (error) {
-		// Swallow
-		// XXX (@Qix-) should we be logging these?
-	}
-}
-
-/**
- * Load `namespaces`.
- *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
-function load() {
-	let r;
-	try {
-		r = exports.storage.getItem('debug');
-	} catch (error) {
-		// Swallow
-		// XXX (@Qix-) should we be logging these?
-	}
-
-	// If debug isn't set in LS, and we're in Electron, try to load $DEBUG
-	if (!r && typeof process !== 'undefined' && 'env' in process) {
-		r = process.env.DEBUG;
-	}
-
-	return r;
-}
-
-/**
- * Localstorage attempts to return the localstorage.
- *
- * This is necessary because safari throws
- * when a user disables cookies/localstorage
- * and you attempt to access it.
- *
- * @return {LocalStorage}
- * @api private
- */
-
-function localstorage() {
-	try {
-		// TVMLKit (Apple TV JS Runtime) does not have a window object, just localStorage in the global context
-		// The Browser also has localStorage in the global context.
-		return localStorage;
-	} catch (error) {
-		// Swallow
-		// XXX (@Qix-) should we be logging these?
-	}
-}
-
-module.exports = __webpack_require__(486)(exports);
-
-const {formatters} = module.exports;
-
-/**
- * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
- */
-
-formatters.j = function (v) {
-	try {
-		return JSON.stringify(v);
-	} catch (error) {
-		return '[UnexpectedJSONParseError]: ' + error.message;
-	}
-};
 
 
 /***/ }),
@@ -25742,32 +24231,6 @@ function paginationMethodsPlugin (octokit) {
 
 /***/ }),
 
-/***/ 851:
-/***/ (function(module) {
-
-module.exports = isntWebhook
-
-// Example webhook event request:
-// https://developer.github.com/webhooks/#example-delivery
-function isntWebhook (request, options) {
-  // GitHub sends all events as POST requests
-  if (request.method !== 'POST') {
-    return true
-  }
-
-  // We must match the configured path to allow custom POST routes which include
-  // the webhook route. For example if the webhook route is / then it would be
-  // impossible to define a `POST /my/custom/app` route as the `POST /`.
-  if (request.url.split('?')[0] !== options.path) {
-    return true
-  }
-
-  return false
-}
-
-
-/***/ }),
-
 /***/ 854:
 /***/ (function(module) {
 
@@ -26817,82 +25280,6 @@ module.exports = function (str) {
 
 /***/ }),
 
-/***/ 867:
-/***/ (function(module) {
-
-module.exports = require("tty");
-
-/***/ }),
-
-/***/ 868:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-module.exports = middleware
-
-const isntWebhook = __webpack_require__(851)
-const getMissingHeaders = __webpack_require__(1)
-const getPayload = __webpack_require__(629)
-const verifyAndReceive = __webpack_require__(958)
-
-const debug = __webpack_require__(784)('webhooks:receiver')
-function middleware (state, request, response, next) {
-  if (isntWebhook(request, { path: state.path })) {
-    // the next callback is set when used as an express middleware. That allows
-    // it to define custom routes like /my/custom/page while the webhooks are
-    // expected to be sent to the / root path. Otherwise the root path would
-    // match all requests and would make it impossible to define custom rooutes
-    if (typeof next === 'function') {
-      next()
-      return
-    }
-
-    debug(`ignored: ${request.method} ${request.url}`)
-    response.statusCode = 404
-    response.end('Not found')
-    return
-  }
-
-  const missingHeaders = getMissingHeaders(request).join(', ')
-  if (missingHeaders) {
-    const error = new Error(`Required headers missing: ${missingHeaders}`)
-
-    return state.eventHandler.receive(error)
-      .catch(() => {
-        response.statusCode = 400
-        response.end(error.message)
-      })
-  }
-
-  const eventName = request.headers['x-github-event']
-  const signature = request.headers['x-hub-signature']
-  const id = request.headers['x-github-delivery']
-
-  debug(`${eventName} event received (id: ${id})`)
-
-  return getPayload(request)
-
-    .then((payload) => {
-      return verifyAndReceive(state, {
-        id: id,
-        name: eventName,
-        payload,
-        signature
-      })
-    })
-
-    .then(() => {
-      response.end('ok\n')
-    })
-
-    .catch(error => {
-      response.statusCode = error.status || 500
-      response.end(error.toString())
-    })
-}
-
-
-/***/ }),
-
 /***/ 873:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -26943,7 +25330,7 @@ module.exports = {
   compareBuild: __webpack_require__(465),
   sort: __webpack_require__(120),
   rsort: __webpack_require__(593),
-  gt: __webpack_require__(291),
+  gt: __webpack_require__(486),
   lt: __webpack_require__(586),
   eq: __webpack_require__(298),
   neq: __webpack_require__(873),
@@ -28682,35 +27069,6 @@ module.exports.shellSync = (cmd, opts) => handleShell(module.exports.sync, cmd, 
 
 /***/ }),
 
-/***/ 958:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-module.exports = verifyAndReceive
-
-const verify = __webpack_require__(153)
-
-function verifyAndReceive (state, event) {
-  const matchesSignature = verify(state.secret, event.payload, event.signature)
-
-  if (!matchesSignature) {
-    const error = new Error('signature does not match event payload and secret')
-
-    error.event = event
-    error.status = 400
-
-    return state.eventHandler.receive(error)
-  }
-
-  return state.eventHandler.receive({
-    id: event.id,
-    name: event.name,
-    payload: event.payload
-  })
-}
-
-
-/***/ }),
-
 /***/ 966:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -29018,43 +27376,4 @@ createToken('STAR', '(<|>)?=?\\s*\\*')
 
 /***/ })
 
-/******/ },
-/******/ function(__webpack_require__) { // webpackRuntimeModules
-/******/ 	"use strict";
-/******/ 
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	!function() {
-/******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = function(exports) {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	}();
-/******/ 	
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	!function() {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = function(module) {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				function getDefault() { return module['default']; } :
-/******/ 				function getModuleExports() { return module; };
-/******/ 			__webpack_require__.d(getter, 'a', getter);
-/******/ 			return getter;
-/******/ 		};
-/******/ 	}();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getter */
-/******/ 	!function() {
-/******/ 		// define getter function for harmony exports
-/******/ 		var hasOwnProperty = Object.prototype.hasOwnProperty;
-/******/ 		__webpack_require__.d = function(exports, name, getter) {
-/******/ 			if(!hasOwnProperty.call(exports, name)) {
-/******/ 				Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 			}
-/******/ 		};
-/******/ 	}();
-/******/ 	
-/******/ }
-);
+/******/ });
