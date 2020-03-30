@@ -105,7 +105,7 @@ async function run() {
             repo,
             tag_name: newTag,
             name: releaseName,
-            body: '',
+            body: '-',
             draft: false,
             prerelease
         });
