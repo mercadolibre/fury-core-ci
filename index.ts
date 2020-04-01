@@ -1,7 +1,6 @@
 const core = require('@actions/core');
 const Github = require('@actions/github');
 import * as Webhooks from '@octokit/webhooks'
-// const Webhooks = require("@octokit/webhooks");
 
 const semver = require('semver')
 

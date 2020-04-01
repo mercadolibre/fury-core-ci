@@ -9973,7 +9973,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const core = __webpack_require__(470);
 const Github = __webpack_require__(469);
-// const Webhooks = require("@octokit/webhooks");
 const semver = __webpack_require__(876);
 const patchRegex = /^fix\/.*/;
 const minorRegex = /^feature\/.*/;
