@@ -10015,6 +10015,11 @@ function run() {
                     core.info('PR action not supported, skipping');
                     return;
                 }
+                branch = prPayload.pull_request.head.ref;
+                // Branch name validation:
+                if (!patchRegex.test(branch) && !minorRegex.test(branch) && !majorRegex.test(branch)) {
+                    throw new Error('Branch name pattern is not valid');
+                }
                 // PR NOT merged:
                 if (prPayload.action === 'closed' && !prPayload.pull_request.merged) {
                     return;
@@ -10023,7 +10028,6 @@ function run() {
                 if (prPayload.action === 'closed' && prPayload.pull_request.merged) {
                     prerelease = false;
                 }
-                branch = prPayload.pull_request.head.ref;
                 body = prPayload.pull_request.body;
                 prNumber = prPayload.number;
                 releaseName = prPayload.pull_request.title;
