@@ -19,15 +19,18 @@ async function run() {
         let prerelease = true
         let branch = ''
         let body = ''
+        let releaseName = ''
         let prNumber = 0
-        if (Github.context.eventName === 'push') {
-            const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
-            branch = pushPayload.ref.replace('refs/heads/', '')
-            if(branch === 'master'){
-                core.info('pushed to master, skipping')
-                console.log(JSON.stringify(pushPayload))
-                return
-            }
+        // if (Github.context.eventName === 'push') {
+        //     const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
+        //     branch = pushPayload.ref.replace('refs/heads/', '')
+        //     if (branch === 'master') {
+        //         core.info('pushed to master, skipping')
+        //         return
+        //     }
+        // }
+        if (Github.context.eventName !== 'pull_request') {
+            return
         }
 
         if (Github.context.eventName === 'pull_request') {
@@ -56,6 +59,7 @@ async function run() {
             branch = prPayload.pull_request.head.ref
             body = prPayload.pull_request.body
             prNumber = prPayload.number
+            releaseName = prPayload.pull_request.title
         }
 
         // Define tag and release name
@@ -70,9 +74,6 @@ async function run() {
                 break
             case majorRegex.test(branch):
                 bump = `${prefix}major`
-                break
-            case branch === 'v1':// todo remove
-                bump = `${prefix}minor`
                 break
             default:
                 core.warning('branch name not expected, skipping')
@@ -101,9 +102,6 @@ async function run() {
         } else {
             newTag = semver.inc(lastTag, bump)
         }
-        const releaseName = newTag//todo
-        console.log(lastTag)
-        console.log(newTag)
 
         const createReleaseResponse = await octokit.repos.createRelease({
             owner,
@@ -118,18 +116,14 @@ async function run() {
         // const {
         //     data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
         // } = createReleaseResponse;
-        console.log(createReleaseResponse.status)
-        console.log(prNumber)
         if (createReleaseResponse.status === 201 && prNumber > 0) {
             const params = {
                 repo,
                 issue_number: prNumber,
                 owner,
-                body: `Tag \`${newTag}\` created.`
+                body: `:label: Release \`${newTag}\` created.`
             };
-            console.log(params)
             const new_comment = await octokit.issues.createComment(params);
-            console.log(JSON.stringify(new_comment))
         }
         // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
         // core.setOutput('id', releaseId);
