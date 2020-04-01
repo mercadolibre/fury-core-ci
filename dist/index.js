@@ -10087,7 +10087,7 @@ function run() {
                     repo,
                     issue_number: prNumber,
                     owner,
-                    body: `:label: Release \`${newTag}\` created.`
+                    body: `:label: ${prerelease ? 'Pre-release' : 'Release'} \`${newTag}\` created.`
                 };
                 const new_comment = yield octokit.issues.createComment(params);
             }
