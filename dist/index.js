@@ -9975,9 +9975,9 @@ const core = __webpack_require__(470);
 const Github = __webpack_require__(469);
 // const Webhooks = require("@octokit/webhooks");
 const semver = __webpack_require__(876);
-const patchRegex = /fix\/*/;
-const minorRegex = /feature\/*/;
-const majorRegex = /release\/*/;
+const patchRegex = /^fix\/.*/;
+const minorRegex = /^feature\/.*/;
+const majorRegex = /^release\/.*/;
 // most @actions toolkit packages have async methods
 function run() {
     return __awaiter(this, void 0, void 0, function* () {

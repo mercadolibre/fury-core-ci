@@ -5,9 +5,9 @@ import * as Webhooks from '@octokit/webhooks'
 
 const semver = require('semver')
 
-const patchRegex = /fix\/*/
-const minorRegex = /feature\/*/
-const majorRegex = /release\/*/
+const patchRegex = /^fix\/.*/
+const minorRegex = /^feature\/.*/
+const majorRegex = /^release\/.*/
 
 // most @actions toolkit packages have async methods
 async function run() {
