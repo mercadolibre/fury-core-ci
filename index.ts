@@ -90,12 +90,12 @@ async function run() {
         });
 
         let newTag = ""
-        core.warning('tags:')
+        core.info('tags:')
         console.log(tags.data.map(tag => tag.name))
-        core.debug(tags.data.map(tag => tag.name))
-        const fullReleases = tags.data.filter(tag => !semver.prerelease(tag.name))
+        const fullReleases = tags.data.filter(tag => !semver.prerelease(tag.name) && semver.valid(tag.name) === tag.name)
         const firstValid = fullReleases.find(tag => semver.valid(tag.name))
-        core.debug(`firstValid: ${firstValid}`)
+        console.log(fullReleases)
+        core.info(`firstValid: ${firstValid}`)
         let lastTag = firstValid.name
         if (prerelease) {
             const rcName = `rc-${branch.replace('/', '-')}`
