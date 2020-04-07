@@ -90,8 +90,10 @@ async function run() {
         });
 
         let newTag = ""
+        core.debug(tags.data.map(tag => tag.name))
         const fullReleases = tags.data.filter(tag => !semver.prerelease(tag.name))
         const firstValid = fullReleases.find(tag => semver.valid(tag.name))
+        core.debug(`firstValid: ${firstValid}`)
         let lastTag = firstValid.name
         if (prerelease) {
             const rcName = `rc-${branch.replace('/', '-')}`
@@ -106,7 +108,7 @@ async function run() {
         } else {
             newTag = semver.inc(lastTag, bump)
         }
-
+        core.debug(`newTag: ${newTag}`)
         const createReleaseResponse = await octokit.repos.createRelease({
             owner,
             repo,

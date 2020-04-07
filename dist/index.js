@@ -10054,8 +10054,10 @@ function run() {
                 per_page: 100
             });
             let newTag = "";
+            core.debug(tags.data.map(tag => tag.name));
             const fullReleases = tags.data.filter(tag => !semver.prerelease(tag.name));
             const firstValid = fullReleases.find(tag => semver.valid(tag.name));
+            core.debug(`firstValid: ${firstValid}`);
             let lastTag = firstValid.name;
             if (prerelease) {
                 const rcName = `rc-${branch.replace('/', '-')}`;
@@ -10072,6 +10074,7 @@ function run() {
             else {
                 newTag = semver.inc(lastTag, bump);
             }
+            core.debug(`newTag: ${newTag}`);
             const createReleaseResponse = yield octokit.repos.createRelease({
                 owner,
                 repo,
