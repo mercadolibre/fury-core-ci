@@ -90,6 +90,7 @@ async function run() {
         });
 
         let newTag = ""
+        console.log(tags.data.map(tag => tag.name))
         core.debug(tags.data.map(tag => tag.name))
         const fullReleases = tags.data.filter(tag => !semver.prerelease(tag.name))
         const firstValid = fullReleases.find(tag => semver.valid(tag.name))
