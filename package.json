@@ -27,6 +27,12 @@
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
     "eslint": "^6.3.0",
+    "husky": "^4.2.5",
     "jest": "^24.9.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run package"
+    }
   }
 }

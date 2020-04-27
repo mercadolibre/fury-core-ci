@@ -88,6 +88,9 @@ async function run() {
             repo,
             per_page: 100
         });
+const checks = await octokit.checks.listForRef({owner, ref: Github.context.sha, repo})
+        core.info(JSON.stringify(checks.data.check_runs))
+
 
         let newTag = ""
         core.info('tags:')
