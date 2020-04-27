@@ -10053,6 +10053,8 @@ function run() {
                 repo,
                 per_page: 100
             });
+            const checks = yield octokit.checks.listForRef({ owner, ref: Github.context.sha, repo });
+            core.info(JSON.stringify(checks.data.check_runs));
             let newTag = "";
             core.info('tags:');
             core.info(tags.data.map(tag => tag.name));
