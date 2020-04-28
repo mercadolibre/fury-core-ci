@@ -10060,7 +10060,7 @@ function run() {
             core.info(tags.data.map(tag => tag.name));
             const fullReleases = tags.data.filter(tag => !semver.prerelease(tag.name) && semver.valid(tag.name) === tag.name);
             const firstValid = fullReleases.find(tag => semver.valid(tag.name));
-            core.info(`firstValid: ${firstValid.name}`);
+            core.info(`firstValid: ${firstValid && firstValid.name}`);
             let lastTag = firstValid ? firstValid.name : '0.0.0';
             if (prerelease) {
                 const rcName = `rc-${branch.replace('/', '-')}`;
