@@ -88,8 +88,9 @@ async function run() {
         });
 
         await octokit.issues.addLabels({
-            ...repo,
-            number: prPayload.pull_request.number,
+            repo,
+            owner,
+            issue_number: prPayload.pull_request.number,
             labels: [pattern.label]
         })
 

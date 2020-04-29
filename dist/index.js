@@ -10046,7 +10046,12 @@ function run() {
                 repo,
                 per_page: 100
             });
-            yield octokit.issues.addLabels(Object.assign({}, repo, { number: prPayload.pull_request.number, labels: [pattern.label] }));
+            yield octokit.issues.addLabels({
+                repo,
+                owner,
+                issue_number: prPayload.pull_request.number,
+                labels: [pattern.label]
+            });
             let newTag = "";
             core.info('tags:');
             core.info(tags.data.map(tag => tag.name));
