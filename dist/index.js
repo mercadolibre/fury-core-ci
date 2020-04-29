@@ -9991,14 +9991,20 @@ function run() {
             let body = '';
             let releaseName = '';
             let prNumber = 0;
-            // if (Github.context.eventName === 'push') {
-            //     const pushPayload = Github.context.payload as Webhooks.WebhookPayloadPush
-            //     branch = pushPayload.ref.replace('refs/heads/', '')
-            //     if (branch === 'master') {
-            //         core.info('pushed to master, skipping')
-            //         return
-            //     }
-            // }
+            if (Github.context.eventName === 'issue_comment') {
+                const issuePayload = Github.context.payload;
+                if (issuePayload.action === 'created' && issuePayload.comment.body.includes('#build')) {
+                    core.info(issuePayload.issue.number);
+                    const params = {
+                        repo,
+                        issue_number: issuePayload.issue.number,
+                        owner,
+                        body: `hi`
+                    };
+                    yield octokit.issues.createComment(params);
+                }
+                return;
+            }
             if (Github.context.eventName !== 'pull_request') {
                 return;
             }
