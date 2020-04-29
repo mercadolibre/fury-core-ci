@@ -1,5 +1,7 @@
 name: Create release candidate tag
 on:
+  issue_comment:
+    types: [created]
   pull_request:
     branches: [ master ]
     types: [opened, synchronize, ready_for_review, edited, closed]
