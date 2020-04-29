@@ -1,12 +1,18 @@
 const core = require('@actions/core');
 const Github = require('@actions/github');
 import * as Webhooks from '@octokit/webhooks'
-
 const semver = require('semver')
 
-const patchRegex = /^fix\/.*/
-const minorRegex = /^feature\/.*/
-const majorRegex = /^release\/.*/
+type BranchType = {
+    pattern: RegExp,
+    bump: 'patch' | 'minor' | 'major',
+    label: string
+}
+const branches: Array<BranchType> = [
+    {pattern: /^fix\/.*/, bump: "patch", label: "fix"},
+    {pattern: /^feature\/.*/, bump: "minor", label: "feature"},
+    {pattern: /^release\/.*/, bump: "major", label: "release"},
+]
 
 // most @actions toolkit packages have async methods
 async function run() {
@@ -32,8 +38,8 @@ async function run() {
             return
         }
 
-        if (Github.context.eventName === 'pull_request') {
-            const prPayload = Github.context.payload as Webhooks.WebhookPayloadPullRequest
+        const prPayload = Github.context.payload as Webhooks.WebhookPayloadPullRequest
+        // if (Github.context.eventName === 'pull_request') {
             if (prPayload.pull_request.base.ref !== 'master') {
                 core.info('PR not to master, skipping')
                 return
@@ -48,9 +54,9 @@ async function run() {
             }
             branch = prPayload.pull_request.head.ref
             // Branch name validation:
-            if(!patchRegex.test(branch) && !minorRegex.test(branch) && !majorRegex.test(branch)){
-                throw new Error('Branch name pattern is not valid')
-            }
+            // if(!patchRegex.test(branch) && !minorRegex.test(branch) && !majorRegex.test(branch)){
+            //     throw new Error('Branch name pattern is not valid')
+            // }
             // PR NOT merged:
             if (prPayload.action === 'closed' && !prPayload.pull_request.merged) {
                 return
@@ -64,33 +70,28 @@ async function run() {
             body = prPayload.pull_request.body
             prNumber = prPayload.number
             releaseName = prPayload.pull_request.title
-        }
+        // }
 
         // Define tag and release name
-        let bump = ''
         const prefix = prerelease ? 'pre' : ''
-        switch (true) {
-            case patchRegex.test(branch):
-                bump = `${prefix}patch`
-                break
-            case minorRegex.test(branch):
-                bump = `${prefix}minor`
-                break
-            case majorRegex.test(branch):
-                bump = `${prefix}major`
-                break
-            default:
-                core.warning('branch name not expected, skipping')
-                return
+        const pattern = branches.find(branchPat => branchPat.pattern.test(branch))
+        if(!pattern) {
+            core.warning('branch pattern not expected, skipping')
+            return
         }
+        const bump = `${prefix}${pattern.bump}`
+
         const tags = await octokit.repos.listTags({
             owner,
             repo,
             per_page: 100
         });
-const checks = await octokit.checks.listForRef({owner, ref: Github.context.sha, repo})
-        core.info(JSON.stringify(checks.data.check_runs))
 
+        await octokit.issues.addLabels({
+            ...repo,
+            number: prPayload.pull_request.number,
+            labels: [pattern.label]
+        })
 
         let newTag = ""
         core.info('tags:')

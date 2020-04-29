@@ -9974,9 +9974,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const core = __webpack_require__(470);
 const Github = __webpack_require__(469);
 const semver = __webpack_require__(876);
-const patchRegex = /^fix\/.*/;
-const minorRegex = /^feature\/.*/;
-const majorRegex = /^release\/.*/;
+const branches = [
+    { pattern: /^fix\/.*/, bump: "patch", label: "fix" },
+    { pattern: /^feature\/.*/, bump: "minor", label: "feature" },
+    { pattern: /^release\/.*/, bump: "major", label: "release" },
+];
 // most @actions toolkit packages have async methods
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -10000,61 +10002,51 @@ function run() {
             if (Github.context.eventName !== 'pull_request') {
                 return;
             }
-            if (Github.context.eventName === 'pull_request') {
-                const prPayload = Github.context.payload;
-                if (prPayload.pull_request.base.ref !== 'master') {
-                    core.info('PR not to master, skipping');
-                    return;
-                }
-                if (prPayload.pull_request.draft) {
-                    core.info('PR is a draft, skipping');
-                    return;
-                }
-                if (!['opened', 'edited', 'closed', 'ready_for_review', 'synchronize'].includes(prPayload.action)) {
-                    core.info('PR action not supported, skipping');
-                    return;
-                }
-                branch = prPayload.pull_request.head.ref;
-                // Branch name validation:
-                if (!patchRegex.test(branch) && !minorRegex.test(branch) && !majorRegex.test(branch)) {
-                    throw new Error('Branch name pattern is not valid');
-                }
-                // PR NOT merged:
-                if (prPayload.action === 'closed' && !prPayload.pull_request.merged) {
-                    return;
-                }
-                // PR merged:
-                if (prPayload.action === 'closed' && prPayload.pull_request.merged) {
-                    prerelease = false;
-                }
-                body = prPayload.pull_request.body;
-                prNumber = prPayload.number;
-                releaseName = prPayload.pull_request.title;
+            const prPayload = Github.context.payload;
+            // if (Github.context.eventName === 'pull_request') {
+            if (prPayload.pull_request.base.ref !== 'master') {
+                core.info('PR not to master, skipping');
+                return;
             }
+            if (prPayload.pull_request.draft) {
+                core.info('PR is a draft, skipping');
+                return;
+            }
+            if (!['opened', 'edited', 'closed', 'ready_for_review', 'synchronize'].includes(prPayload.action)) {
+                core.info('PR action not supported, skipping');
+                return;
+            }
+            branch = prPayload.pull_request.head.ref;
+            // Branch name validation:
+            // if(!patchRegex.test(branch) && !minorRegex.test(branch) && !majorRegex.test(branch)){
+            //     throw new Error('Branch name pattern is not valid')
+            // }
+            // PR NOT merged:
+            if (prPayload.action === 'closed' && !prPayload.pull_request.merged) {
+                return;
+            }
+            // PR merged:
+            if (prPayload.action === 'closed' && prPayload.pull_request.merged) {
+                prerelease = false;
+            }
+            body = prPayload.pull_request.body;
+            prNumber = prPayload.number;
+            releaseName = prPayload.pull_request.title;
+            // }
             // Define tag and release name
-            let bump = '';
             const prefix = prerelease ? 'pre' : '';
-            switch (true) {
-                case patchRegex.test(branch):
-                    bump = `${prefix}patch`;
-                    break;
-                case minorRegex.test(branch):
-                    bump = `${prefix}minor`;
-                    break;
-                case majorRegex.test(branch):
-                    bump = `${prefix}major`;
-                    break;
-                default:
-                    core.warning('branch name not expected, skipping');
-                    return;
+            const pattern = branches.find(branchPat => branchPat.pattern.test(branch));
+            if (!pattern) {
+                core.warning('branch pattern not expected, skipping');
+                return;
             }
+            const bump = `${prefix}${pattern.bump}`;
             const tags = yield octokit.repos.listTags({
                 owner,
                 repo,
                 per_page: 100
             });
-            const checks = yield octokit.checks.listForRef({ owner, ref: Github.context.sha, repo });
-            core.info(JSON.stringify(checks.data.check_runs));
+            yield octokit.issues.addLabels(Object.assign({}, repo, { number: prPayload.pull_request.number, labels: [pattern.label] }));
             let newTag = "";
             core.info('tags:');
             core.info(tags.data.map(tag => tag.name));
