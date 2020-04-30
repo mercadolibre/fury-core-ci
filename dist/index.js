@@ -9991,11 +9991,12 @@ function run() {
             if (Github.context.eventName === 'issue_comment') {
                 const issuePayload = Github.context.payload;
                 if (issuePayload.action === 'created' && issuePayload.comment.body.includes('#tag')) {
-                    pr = (yield octokit.pulls.get({
+                    const resp = yield octokit.pulls.get({
                         owner,
                         repo,
                         pull_number: issuePayload.issue.number,
-                    }));
+                    });
+                    pr = resp.data;
                 }
             }
             // Extract from pull_request event
@@ -10024,8 +10025,6 @@ function run() {
                 core.warning('PR not found');
                 return;
             }
-            core.info(pr.base);
-            core.info(pr.head);
             if (pr.base.ref !== 'master') {
                 core.info('PR not to master, skipping');
                 return;
