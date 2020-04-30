@@ -28,16 +28,12 @@ async function run() {
         // Extract from comment event
         if (Github.context.eventName === 'issue_comment') {
             const issuePayload = Github.context.payload as Webhooks.WebhookPayloadIssueComment
-            core.info(issuePayload.comment.body)
             if (issuePayload.action === 'created' && issuePayload.comment.body.includes('#tag')) {
-                const asd = await octokit.pulls.get({
+                pr = await octokit.pulls.get({
                     owner,
                     repo,
                     pull_number: issuePayload.issue.number,
-                })
-                core.info(JSON.stringify(asd))
-                pr = asd as WebhookPayloadPullRequestPullRequest
-                core.info(JSON.stringify(pr))
+                }) as WebhookPayloadPullRequestPullRequest
             }
         }
         // Extract from pull_request event
@@ -66,6 +62,8 @@ async function run() {
             core.warning('PR not found')
             return
         }
+        core.info(pr.base)
+        core.info(pr.head)
         if (pr.base.ref !== 'master') {
             core.info('PR not to master, skipping')
             return

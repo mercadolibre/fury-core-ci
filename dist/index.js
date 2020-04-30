@@ -9990,16 +9990,12 @@ function run() {
             // Extract from comment event
             if (Github.context.eventName === 'issue_comment') {
                 const issuePayload = Github.context.payload;
-                core.info(issuePayload.comment.body);
                 if (issuePayload.action === 'created' && issuePayload.comment.body.includes('#tag')) {
-                    const asd = yield octokit.pulls.get({
+                    pr = (yield octokit.pulls.get({
                         owner,
                         repo,
                         pull_number: issuePayload.issue.number,
-                    });
-                    core.info(JSON.stringify(asd));
-                    pr = asd;
-                    core.info(JSON.stringify(pr));
+                    }));
                 }
             }
             // Extract from pull_request event
@@ -10028,6 +10024,8 @@ function run() {
                 core.warning('PR not found');
                 return;
             }
+            core.info(pr.base);
+            core.info(pr.head);
             if (pr.base.ref !== 'master') {
                 core.info('PR not to master, skipping');
                 return;
