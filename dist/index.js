@@ -9974,98 +9974,91 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const core = __webpack_require__(470);
 const Github = __webpack_require__(469);
 const semver = __webpack_require__(876);
-const branches = [
+const branchTypes = [
     { pattern: /^fix\/.*/, bump: "patch", label: "fix" },
     { pattern: /^feature\/.*/, bump: "minor", label: "feature" },
     { pattern: /^release\/.*/, bump: "major", label: "release" },
 ];
+const token = process.env['GITHUB_TOKEN'];
+const octokit = new Github.GitHub(token);
+const { owner, repo } = Github.context.repo;
 // most @actions toolkit packages have async methods
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const token = process.env['GITHUB_TOKEN'];
-            const octokit = new Github.GitHub(token);
-            const { owner, repo } = Github.context.repo;
-            let prerelease = true;
-            let branch = '';
-            let body = '';
-            let releaseName = '';
-            let prNumber = 0;
+            let pr = null;
+            // Extract from comment event
             if (Github.context.eventName === 'issue_comment') {
                 const issuePayload = Github.context.payload;
-                if (issuePayload.action === 'created' && issuePayload.comment.body.includes('#build')) {
-                    core.info(issuePayload.issue.number);
+                if (issuePayload.action === 'created' && issuePayload.comment.body.includes('#tag')) {
+                    pr = yield octokit.pulls.get({
+                        owner,
+                        repo,
+                        pull_number: issuePayload.issue.number,
+                    });
+                }
+            }
+            // Extract from pull_request event
+            if (Github.context.eventName === 'pull_request') {
+                const prPayload = Github.context.payload;
+                // Opened:
+                if (prPayload.action === 'opened') {
+                    yield addLabel(prPayload.pull_request);
                     const params = {
                         repo,
-                        issue_number: issuePayload.issue.number,
+                        issue_number: prPayload.number,
                         owner,
-                        body: `hi`
+                        body: `Add a comment including \`#tag\` to create a release candidate tag.`
                     };
                     yield octokit.issues.createComment(params);
+                    return;
                 }
+                // Continue only when PR is closed and merged:
+                if (!(prPayload.action === 'closed' && prPayload.pull_request.merged)) {
+                    return;
+                }
+                pr = prPayload.pull_request;
+            }
+            // Additional validations
+            if (!pr) {
+                core.warning('PR not found');
                 return;
             }
-            if (Github.context.eventName !== 'pull_request') {
-                return;
-            }
-            const prPayload = Github.context.payload;
-            // if (Github.context.eventName === 'pull_request') {
-            if (prPayload.pull_request.base.ref !== 'master') {
+            if (pr.base.ref !== 'master') {
                 core.info('PR not to master, skipping');
                 return;
             }
-            if (prPayload.pull_request.draft) {
+            if (pr.draft) {
                 core.info('PR is a draft, skipping');
                 return;
             }
-            if (!['opened', 'edited', 'closed', 'ready_for_review', 'synchronize'].includes(prPayload.action)) {
-                core.info('PR action not supported, skipping');
-                return;
-            }
-            branch = prPayload.pull_request.head.ref;
-            // Branch name validation:
-            // if(!patchRegex.test(branch) && !minorRegex.test(branch) && !majorRegex.test(branch)){
-            //     throw new Error('Branch name pattern is not valid')
-            // }
-            // PR NOT merged:
-            if (prPayload.action === 'closed' && !prPayload.pull_request.merged) {
-                return;
-            }
-            // PR merged:
-            if (prPayload.action === 'closed' && prPayload.pull_request.merged) {
-                prerelease = false;
-            }
-            body = prPayload.pull_request.body;
-            prNumber = prPayload.number;
-            releaseName = prPayload.pull_request.title;
-            // }
+            const preRelease = pr.merged;
+            const branch = pr.head.ref;
+            const prNumber = pr.number;
             // Define tag and release name
-            const prefix = prerelease ? 'pre' : '';
-            const pattern = branches.find(branchPat => branchPat.pattern.test(branch));
+            const prefix = preRelease ? 'pre' : '';
+            const pattern = branchTypes.find(branchPat => branchPat.pattern.test(branch));
+            // Branch name validation:
             if (!pattern) {
                 core.warning('branch pattern not expected, skipping');
                 return;
             }
-            const bump = `${prefix}${pattern.bump}`;
+            // Get existing tags
             const tags = yield octokit.repos.listTags({
                 owner,
                 repo,
                 per_page: 100
             });
-            yield octokit.issues.addLabels({
-                repo,
-                owner,
-                issue_number: prPayload.pull_request.number,
-                labels: [pattern.label]
-            });
             let newTag = "";
             core.info('tags:');
             core.info(tags.data.map(tag => tag.name));
+            // Find last valid tag (not RC)
             const fullReleases = tags.data.filter(tag => !semver.prerelease(tag.name) && semver.valid(tag.name) === tag.name);
             const firstValid = fullReleases.find(tag => semver.valid(tag.name));
             core.info(`firstValid: ${firstValid && firstValid.name}`);
             let lastTag = firstValid ? firstValid.name : '0.0.0';
-            if (prerelease) {
+            const bump = `${prefix}${pattern.bump}`;
+            if (preRelease) {
                 const rcName = `rc-${branch.replace('/', '-')}`;
                 const rcs = tags.data.filter(tag => tag.name.includes(rcName));
                 if (rcs.length !== 0) {
@@ -10080,26 +10073,24 @@ function run() {
             else {
                 newTag = semver.inc(lastTag, bump);
             }
-            core.debug(`newTag: ${newTag}`);
+            core.info(`newTag: ${newTag}`);
+            // Create release
             const createReleaseResponse = yield octokit.repos.createRelease({
                 owner,
                 repo,
                 tag_name: newTag,
-                name: releaseName,
-                body,
+                name: pr.title,
+                body: pr.body,
                 draft: false,
-                prerelease
+                prerelease: preRelease
             });
-            // Get the ID, html_url, and upload URL for the created Release from the response
-            // const {
-            //     data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
-            // } = createReleaseResponse;
+            // If successful, create comment
             if (createReleaseResponse.status === 201 && prNumber > 0) {
                 const params = {
                     repo,
                     issue_number: prNumber,
                     owner,
-                    body: `:label: ${prerelease ? 'Pre-release' : 'Release'} \`${newTag}\` created.`
+                    body: `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created.`
                 };
                 const new_comment = yield octokit.issues.createComment(params);
             }
@@ -10111,6 +10102,22 @@ function run() {
         catch (error) {
             core.setFailed(error.message);
         }
+    });
+}
+function addLabel(pr) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pattern = branchTypes.find(branchPat => branchPat.pattern.test(pr.head.ref));
+        // Branch name validation:
+        if (!pattern) {
+            core.warning('branch pattern not expected, skipping');
+            return;
+        }
+        yield octokit.issues.addLabels({
+            repo,
+            owner,
+            issue_number: pr.number,
+            labels: [pattern.label]
+        });
     });
 }
 run();
