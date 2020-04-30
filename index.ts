@@ -34,6 +34,7 @@ async function run() {
                     repo,
                     pull_number: issuePayload.issue.number,
                 })
+                core.info(JSON.stringify(pr))
             }
         }
         // Extract from pull_request event
