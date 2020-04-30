@@ -72,7 +72,7 @@ async function run() {
             return
         }
 
-        const preRelease = pr.merged
+        const preRelease = !pr.merged
         const branch = pr.head.ref
         const prNumber = pr.number
 

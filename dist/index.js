@@ -10033,7 +10033,7 @@ function run() {
                 core.info('PR is a draft, skipping');
                 return;
             }
-            const preRelease = pr.merged;
+            const preRelease = !pr.merged;
             const branch = pr.head.ref;
             const prNumber = pr.number;
             // Define tag and release name
