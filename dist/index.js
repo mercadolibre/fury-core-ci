@@ -9990,6 +9990,7 @@ function run() {
             // Extract from comment event
             if (Github.context.eventName === 'issue_comment') {
                 const issuePayload = Github.context.payload;
+                core.info(issuePayload.comment.body);
                 if (issuePayload.action === 'created' && issuePayload.comment.body.includes('#tag')) {
                     pr = yield octokit.pulls.get({
                         owner,
@@ -9997,6 +9998,9 @@ function run() {
                         pull_number: issuePayload.issue.number,
                     });
                     core.info(JSON.stringify(pr));
+                }
+                else {
+                    return;
                 }
             }
             // Extract from pull_request event
