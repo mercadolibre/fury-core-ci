@@ -9998,6 +9998,8 @@ function run() {
                         pull_number: issuePayload.issue.number,
                     });
                     core.info(JSON.stringify(asd));
+                    pr = asd;
+                    core.info(JSON.stringify(pr));
                 }
             }
             // Extract from pull_request event
