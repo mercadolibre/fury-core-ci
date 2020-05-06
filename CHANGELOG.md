@@ -3,17 +3,17 @@ All notable changes to this project will be documented in this file.
 
 ## [2.2.1](https://github.com/arcticfalcon/test-actions/tree/2.2.0) - 2020-04-29
 ### Super feature
-#### :sparkles: Added
-#### :recycle: Changed
-#### :x: Removed
-#### :bug: Fixed
+#### :sparkles: Added:
+#### :recycle: Changed:
+#### :x: Removed:
+#### :bug: Fixed:
 
 ## [2.2.0](https://github.com/arcticfalcon/test-actions/tree/2.2.0) - 2020-04-29
 ### Title
-#### :star: Added
-#### :exclamation: Changed
-#### :x: Removed
-#### :bug: Fixed
+#### :new: Added:
+#### :recycle: Changed:
+#### :x: Removed:
+#### :bug: Fixed:
 
 #### Pull Request [#21](https://github.com/arcticfalcon/test-actions/pull/21)
 #### Contributors
