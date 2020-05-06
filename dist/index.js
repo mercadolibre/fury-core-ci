@@ -10123,8 +10123,11 @@ ${pr.body}
 #### Contributors
 ${contributors}
 `;
-                yield updateFile('CHANGELOG.md', (v) => {
+                updateFile('CHANGELOG.md', (v) => {
                     const insert = v.indexOf('##');
+                    if (insert == -1) {
+                        return v + `\n${msg}\n\n`;
+                    }
                     return v.substring(0, insert) + `${msg}\n\n` + v.substring(insert);
                 });
                 yield sh('git status');
@@ -10183,22 +10186,14 @@ function sh(cmd) {
     });
 }
 function updateFile(file, update) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => {
-            fs.readFile(file, 'utf-8', (err, data) => {
-                if (err) {
-                    reject(err);
-                }
-                const newData = update(data);
-                fs.writeFile(file, newData, 'utf-8', (err) => {
-                    if (err) {
-                        reject(err);
-                    }
-                    resolve();
-                });
-            });
-        });
-    });
+    if (!fs.existsSync(file)) {
+        fs.writeFileSync(file, `# Changelog
+All notable changes to this project will be documented in this file.
+`, 'utf-8');
+    }
+    const data = fs.readFileSync(file, 'utf-8');
+    const newData = update(data);
+    fs.writeFileSync(file, newData, 'utf-8');
 }
 run();
 
