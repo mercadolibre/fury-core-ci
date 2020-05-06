@@ -10,13 +10,14 @@ const fs = require('fs');
 
 type BranchType = {
     pattern: RegExp,
-    bump: 'patch' | 'minor' | 'major',
+    bump: 'patch' | 'minor' | 'major' | 'chore',
     label: string
 }
 const branchTypes: Array<BranchType> = [
     {pattern: /^fix\/.*/, bump: "patch", label: "fix"},
     {pattern: /^feature\/.*/, bump: "minor", label: "feature"},
     {pattern: /^release\/.*/, bump: "major", label: "release"},
+    {pattern: /^chore\/.*/, bump: "chore", label: "chore"},
 ]
 
 const token = process.env['GITHUB_TOKEN']
@@ -74,7 +75,7 @@ async function run() {
             core.info('PR is a draft, skipping')
             return
         }
-//pr.html_url
+
         const preRelease = !pr.merged
         const branch = pr.head.ref
         const prNumber = pr.number
@@ -85,6 +86,9 @@ async function run() {
         // Branch name validation:
         if (!pattern) {
             core.warning('branch pattern not expected, skipping')
+            return
+        }
+        if(pattern.bump == 'chore'){
             return
         }
 

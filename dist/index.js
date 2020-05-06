@@ -9995,6 +9995,7 @@ const branchTypes = [
     { pattern: /^fix\/.*/, bump: "patch", label: "fix" },
     { pattern: /^feature\/.*/, bump: "minor", label: "feature" },
     { pattern: /^release\/.*/, bump: "major", label: "release" },
+    { pattern: /^chore\/.*/, bump: "chore", label: "chore" },
 ];
 const token = process.env['GITHUB_TOKEN'];
 const octokit = new Github.GitHub(token);
@@ -10050,7 +10051,6 @@ function run() {
                 core.info('PR is a draft, skipping');
                 return;
             }
-            //pr.html_url
             const preRelease = !pr.merged;
             const branch = pr.head.ref;
             const prNumber = pr.number;
@@ -10060,6 +10060,9 @@ function run() {
             // Branch name validation:
             if (!pattern) {
                 core.warning('branch pattern not expected, skipping');
+                return;
+            }
+            if (pattern.bump == 'chore') {
                 return;
             }
             // Get existing tags
