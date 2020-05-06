@@ -10138,7 +10138,7 @@ ${contributors}
                 yield sh('git config user.email "<>"');
                 yield sh('git add CHANGELOG.md');
                 yield sh('git commit -m "Update CHANGELOG.md"');
-                yield sh('git push origin master');
+                yield sh(`git push https://${token}@github.com/${owner}/${repo}.git master`);
             }
             // Create comment
             const params = {
