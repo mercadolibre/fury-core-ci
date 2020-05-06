@@ -10108,7 +10108,7 @@ function run() {
                 return;
             }
             // Update Changelog:
-            if (preRelease) {
+            if (!preRelease) {
                 const resp = yield octokit.pulls.listCommits({
                     owner,
                     repo,

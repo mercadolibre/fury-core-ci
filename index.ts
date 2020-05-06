@@ -132,7 +132,7 @@ async function run() {
             return
         }
         // Update Changelog:
-        if (preRelease) {
+        if (!preRelease) {
             const resp = await octokit.pulls.listCommits({
                 owner,
                 repo,
