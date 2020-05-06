@@ -10108,7 +10108,7 @@ function run() {
                 return;
             }
             // Update Changelog:
-            if (!preRelease) {
+            if (preRelease) {
                 const resp = yield octokit.pulls.listCommits({
                     owner,
                     repo,
@@ -10127,6 +10127,9 @@ ${contributors}
                     const insert = v.indexOf('##');
                     return v.substring(0, insert) + `${msg}\n\n` + v.substring(insert);
                 });
+                yield sh('git status');
+                yield sh('git config user.name "Tagging Workflow"');
+                yield sh('git config user.email "<>"');
                 yield sh('git add CHANGELOG.md');
                 yield sh('git commit -m "Update CHANGELOG.md"');
                 yield sh('git push origin master');

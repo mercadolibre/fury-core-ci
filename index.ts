@@ -132,7 +132,7 @@ async function run() {
             return
         }
         // Update Changelog:
-        if (!preRelease) {
+        if (preRelease) {
             const resp = await octokit.pulls.listCommits({
                 owner,
                 repo,
@@ -152,6 +152,10 @@ ${contributors}
                 const insert = v.indexOf('##')
                 return v.substring(0, insert) + `${msg}\n\n` + v.substring(insert)
             })
+
+            await sh('git status')
+            await sh('git config user.name "Tagging Workflow"')
+            await sh('git config user.email "<>"')
             await sh('git add CHANGELOG.md')
             await sh('git commit -m "Update CHANGELOG.md"')
             await sh('git push origin master')
