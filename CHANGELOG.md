@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
 ## [2.2.0](https://github.com/arcticfalcon/test-actions/tree/2.2.0) - 2020-04-29
 ### Title
 #### :tada: Added:
-#### :warning: Changed:
+#### :recycle: Changed:
 #### :x: Removed:
 #### :bug: Fixed:
 

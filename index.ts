@@ -1,9 +1,12 @@
 import * as Webhooks from "@octokit/webhooks";
 import {WebhookPayloadPullRequestPullRequest} from "@octokit/webhooks";
+import {exec} from 'child_process';
 
+const dayjs = require("dayjs");
 const core = require('@actions/core');
 const Github = require('@actions/github');
 const semver = require('semver')
+const fs = require('fs');
 
 type BranchType = {
     pattern: RegExp,
@@ -59,7 +62,7 @@ async function run() {
             pr = prPayload.pull_request
         }
         // Additional validations
-        if(!pr){
+        if (!pr) {
             core.warning('PR not found')
             return
         }
@@ -71,7 +74,7 @@ async function run() {
             core.info('PR is a draft, skipping')
             return
         }
-
+//pr.html_url
         const preRelease = !pr.merged
         const branch = pr.head.ref
         const prNumber = pr.number
@@ -124,16 +127,44 @@ async function run() {
             draft: false,
             prerelease: preRelease
         });
-        // If successful, create comment
-        if (createReleaseResponse.status === 201 && prNumber > 0) {
-            const params = {
-                repo,
-                issue_number: prNumber,
-                owner,
-                body: `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created.`
-            };
-            const new_comment = await octokit.issues.createComment(params);
+        if (createReleaseResponse.status !== 201 && prNumber > 0) {
+            core.setFailed('Failed to create release');
+            return
         }
+        // Update Changelog:
+        if (!preRelease) {
+            const resp = await octokit.pulls.listCommits({
+                owner,
+                repo,
+                pull_number: pr.number,
+            })
+            const commits = resp.data
+            const contributors = Array.from(new Set(commits.map(commit => commit.author.login))).map(author => `- [@${author}](https://github.com/${author})`)
+
+            const msg = `## [${newTag}](https://github.com/${owner}/${repo}/tree/${newTag}) - ${dayjs().format('YYYY-MM-DD')}
+### ${pr.title}
+${pr.body}
+#### Pull Request [#${pr.number}](https://github.com/${owner}/${repo}/pull/${pr.number})
+#### Contributors
+${contributors}
+`
+            await updateFile('CHANGELOG.md', (v) => {
+                const insert = v.indexOf('##')
+                return v.substring(0, insert) + `${msg}\n\n` + v.substring(insert)
+            })
+            await sh('git add CHANGELOG.md')
+            await sh('git commit -m "Update CHANGELOG.md"')
+            await sh('git push origin master')
+        }
+        // Create comment
+        const params = {
+            repo,
+            issue_number: prNumber,
+            owner,
+            body: `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created.`
+        };
+        const new_comment = await octokit.issues.createComment(params);
+
 
         // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
         // core.setOutput('id', releaseId);
@@ -144,7 +175,7 @@ async function run() {
     }
 }
 
-async function addLabel(pr: WebhookPayloadPullRequestPullRequest){
+async function addLabel(pr: WebhookPayloadPullRequestPullRequest) {
     const pattern = branchTypes.find(branchPat => branchPat.pattern.test(pr.head.ref))
     // Branch name validation:
     if (!pattern) {
@@ -156,6 +187,35 @@ async function addLabel(pr: WebhookPayloadPullRequestPullRequest){
         owner,
         issue_number: pr.number,
         labels: [pattern.label]
+    })
+}
+
+async function sh(cmd) {
+    return new Promise(function (resolve, reject) {
+        exec(cmd, (err, stdout, stderr) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({stdout, stderr});
+            }
+        });
+    });
+}
+
+async function updateFile(file: string, update: (string) => string) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(file, 'utf-8', (err, data) => {
+            if (err) {
+                reject(err)
+            }
+            const newData = update(data)
+            fs.writeFile(file, newData, 'utf-8', (err) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve()
+            })
+        })
     })
 }
 
