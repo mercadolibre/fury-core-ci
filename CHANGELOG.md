@@ -16,6 +16,7 @@ description
 #### :x: Removed:
 #### :bug: Fixed:
 #### Pull Request [#21](https://github.com/arcticfalcon/test-actions/pull/21)
+#### Contributors
 
 ## [2.2.0](https://github.com/arcticfalcon/test-actions/tree/2.2.0) - 2020-04-29
 ### Title
