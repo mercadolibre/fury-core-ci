@@ -165,7 +165,7 @@ ${contributors}
             await sh('git config user.email "<>"')
             await sh('git add CHANGELOG.md')
             await sh('git commit -m "Update CHANGELOG.md"')
-            await sh(`git push https://${token}@github.com/${owner}/${repo}.git master`)
+            await sh(`git push https://${token}@github.com/${owner}/${repo}.git`)
         }
         // Create comment
         const params = {
