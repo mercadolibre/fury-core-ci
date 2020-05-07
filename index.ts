@@ -162,11 +162,20 @@ ${contributors}
 
             await sh('git config user.name "Tagging Workflow"')
             await sh('git config user.email "<>"')
-            await sh('git checkout master')
+            await sh(`git checkout -b chore/changelog-${newTag}`)
             await sh('git add CHANGELOG.md')
             await sh('git commit -m "Update CHANGELOG.md"')
-            await sh(`git remote set-url origin https://${token}@github.com/${owner}/${repo}.git`)
-            await sh(`git push origin master`)
+            await sh(`git push origin`)
+            await octokit.pulls.create({
+                base: "master",
+                body: "Update CHANGELOG.md",
+                draft: false,
+                head: `chore/changelog-${newTag}`,
+                maintainer_can_modify: true,
+                owner,
+                repo,
+                title: `Update CHANGELOG.md for version ${newTag}`
+            })
         }
         // Create comment
         const params = {

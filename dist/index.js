@@ -10135,11 +10135,20 @@ ${contributors}
                 });
                 yield sh('git config user.name "Tagging Workflow"');
                 yield sh('git config user.email "<>"');
-                yield sh('git checkout master');
+                yield sh(`git checkout -b chore/changelog-${newTag}`);
                 yield sh('git add CHANGELOG.md');
                 yield sh('git commit -m "Update CHANGELOG.md"');
-                yield sh(`git remote set-url origin https://${token}@github.com/${owner}/${repo}.git`);
-                yield sh(`git push origin master`);
+                yield sh(`git push origin`);
+                yield octokit.pulls.create({
+                    base: "master",
+                    body: "Update CHANGELOG.md",
+                    draft: false,
+                    head: `chore/changelog-${newTag}`,
+                    maintainer_can_modify: true,
+                    owner,
+                    repo,
+                    title: `Update CHANGELOG.md for version ${newTag}`
+                });
             }
             // Create comment
             const params = {
