@@ -10138,7 +10138,7 @@ ${contributors}
                 yield sh('git checkout master');
                 yield sh('git add CHANGELOG.md');
                 yield sh('git commit -m "Update CHANGELOG.md"');
-                yield sh(`git remote add origin https://${token}@github.com/${owner}/${repo}.git`);
+                yield sh(`git remote set-url origin https://${token}@github.com/${owner}/${repo}.git`);
                 yield sh(`git push origin master`);
             }
             // Create comment

@@ -165,7 +165,7 @@ ${contributors}
             await sh('git checkout master')
             await sh('git add CHANGELOG.md')
             await sh('git commit -m "Update CHANGELOG.md"')
-            await sh(`git remote add origin https://${token}@github.com/${owner}/${repo}.git`)
+            await sh(`git remote set-url origin https://${token}@github.com/${owner}/${repo}.git`)
             await sh(`git push origin master`)
         }
         // Create comment
