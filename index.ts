@@ -166,7 +166,7 @@ ${contributors}
             await sh('git add CHANGELOG.md')
             await sh('git commit -m "Update CHANGELOG.md"')
             await sh(`git push --set-upstream origin chore/changelog-${newTag}`)
-            await octokit.pulls.create({
+            const response = await octokit.pulls.create({
                 base: "master",
                 body: "Update CHANGELOG.md",
                 draft: false,
@@ -175,6 +175,12 @@ ${contributors}
                 owner,
                 repo,
                 title: `Update CHANGELOG.md for version ${newTag}`
+            })
+            await octokit.pulls.merge({
+                merge_method: 'rebase',
+                pull_number: response.data.number,
+                owner,
+                repo
             })
         }
         // Create comment
