@@ -10133,12 +10133,13 @@ ${contributors}
                     }
                     return v.substring(0, insert) + `${msg}\n\n` + v.substring(insert);
                 });
-                yield sh('git status');
                 yield sh('git config user.name "Tagging Workflow"');
                 yield sh('git config user.email "<>"');
+                yield sh('git checkout master');
                 yield sh('git add CHANGELOG.md');
                 yield sh('git commit -m "Update CHANGELOG.md"');
-                yield sh(`git push https://${token}@github.com/${owner}/${repo}.git`);
+                yield sh(`git remote add origin https://${token}@github.com/${owner}/${repo}.git`);
+                yield sh(`git push origin master`);
             }
             // Create comment
             const params = {

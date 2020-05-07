@@ -160,12 +160,13 @@ ${contributors}
                 return v.substring(0, insert) + `${msg}\n\n` + v.substring(insert)
             })
 
-            await sh('git status')
             await sh('git config user.name "Tagging Workflow"')
             await sh('git config user.email "<>"')
+            await sh('git checkout master')
             await sh('git add CHANGELOG.md')
             await sh('git commit -m "Update CHANGELOG.md"')
-            await sh(`git push https://${token}@github.com/${owner}/${repo}.git`)
+            await sh(`git remote add origin https://${token}@github.com/${owner}/${repo}.git`)
+            await sh(`git push origin master`)
         }
         // Create comment
         const params = {
