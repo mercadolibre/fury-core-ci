@@ -10138,7 +10138,7 @@ ${contributors}
                 yield sh(`git checkout -b chore/changelog-${newTag}`);
                 yield sh('git add CHANGELOG.md');
                 yield sh('git commit -m "Update CHANGELOG.md"');
-                yield sh(`git push origin`);
+                yield sh(`git push --set-upstream origin chore/changelog-${newTag}`);
                 yield octokit.pulls.create({
                     base: "master",
                     body: "Update CHANGELOG.md",

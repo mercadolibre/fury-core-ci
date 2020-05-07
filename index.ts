@@ -165,7 +165,7 @@ ${contributors}
             await sh(`git checkout -b chore/changelog-${newTag}`)
             await sh('git add CHANGELOG.md')
             await sh('git commit -m "Update CHANGELOG.md"')
-            await sh(`git push origin`)
+            await sh(`git push --set-upstream origin chore/changelog-${newTag}`)
             await octokit.pulls.create({
                 base: "master",
                 body: "Update CHANGELOG.md",
