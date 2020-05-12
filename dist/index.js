@@ -10149,6 +10149,13 @@ ${contributors}
                     repo,
                     title: `Update CHANGELOG.md for version ${newTag}`
                 });
+                yield octokit.pulls.createReview({
+                    body: "Auto approved",
+                    event: "APPROVE",
+                    owner,
+                    pull_number: response.data.number,
+                    repo,
+                });
                 yield octokit.pulls.merge({
                     merge_method: 'rebase',
                     pull_number: response.data.number,

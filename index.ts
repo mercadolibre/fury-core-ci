@@ -176,6 +176,13 @@ ${contributors}
                 repo,
                 title: `Update CHANGELOG.md for version ${newTag}`
             })
+            await octokit.pulls.createReview({
+                body: "Auto approved",
+                event: "APPROVE",
+                owner,
+                pull_number: response.data.number,
+                repo,
+            })
             await octokit.pulls.merge({
                 merge_method: 'rebase',
                 pull_number: response.data.number,
