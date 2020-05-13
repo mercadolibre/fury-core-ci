@@ -150,7 +150,7 @@ async function run() {
 ${pr.body}
 #### Pull Request [#${pr.number}](https://github.com/${owner}/${repo}/pull/${pr.number})
 #### Contributors
-${contributors}
+${contributors.join("\n")}
 `
             updateFile('CHANGELOG.md', (v) => {
                 const insert = v.indexOf('##')
