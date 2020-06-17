@@ -21,7 +21,6 @@
   "dependencies": {
     "@actions/core": "^1.1.1",
     "@actions/github": "^2.1.1",
-    "@octokit/webhooks": "^7.1.1",
     "dayjs": "^1.8.26",
     "semver": "^7.1.3"
   },

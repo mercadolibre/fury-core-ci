@@ -1,7 +1,4 @@
-import * as Webhooks from "@octokit/webhooks";
-import {WebhookPayloadPullRequestPullRequest} from "@octokit/webhooks";
 import {exec} from 'child_process';
-
 const dayjs = require("dayjs");
 const core = require('@actions/core');
 const Github = require('@actions/github');
@@ -31,7 +28,7 @@ async function run() {
 
         // Extract from comment event
         if (Github.context.eventName === 'issue_comment') {
-            const issuePayload = Github.context.payload as Webhooks.WebhookPayloadIssueComment
+            const issuePayload = Github.context.payload
             if (issuePayload.action === 'created' && issuePayload.comment.body.includes('#tag')) {
                 const resp = await octokit.pulls.get({
                     owner,
@@ -43,7 +40,7 @@ async function run() {
         }
         // Extract from pull_request event
         if (Github.context.eventName === 'pull_request') {
-            const prPayload = Github.context.payload as Webhooks.WebhookPayloadPullRequest
+            const prPayload = Github.context.payload as WebhookPayloadPullRequest
             // Opened:
             if (prPayload.action === 'opened') {
                 await addLabel(prPayload.pull_request)
@@ -248,3 +245,61 @@ All notable changes to this project will be documented in this file.
 }
 
 run()
+
+type WebhookPayloadPullRequestPullRequest = {
+    url: string;
+    id: number;
+    node_id: string;
+    html_url: string;
+    diff_url: string;
+    patch_url: string;
+    issue_url: string;
+    number: number;
+    state: string;
+    locked: boolean;
+    title: string;
+    body: string;
+    created_at: string;
+    updated_at: string;
+    closed_at: null | string;
+    merged_at: null;
+    merge_commit_sha: null | string;
+    requested_reviewers: Array<any>;
+    requested_teams: Array<any>;
+    commits_url: string;
+    review_comments_url: string;
+    review_comment_url: string;
+    comments_url: string;
+    statuses_url: string;
+    head: WebhookPayloadPullRequestPullRequestHead;
+    base: WebhookPayloadPullRequestPullRequestBase;
+    author_association: string;
+    draft: boolean;
+    merged: boolean;
+    mergeable: null | boolean;
+    rebaseable: null | boolean;
+    mergeable_state: string;
+    merged_by: null;
+    comments: number;
+    review_comments: number;
+    maintainer_can_modify: boolean;
+    commits: number;
+    additions: number;
+    deletions: number;
+    changed_files: number;
+};
+type WebhookPayloadPullRequestPullRequestBase = {
+    label: string;
+    ref: string;
+    sha: string;
+};
+type WebhookPayloadPullRequestPullRequestHead = {
+    label: string;
+    ref: string;
+    sha: string;
+};
+type WebhookPayloadPullRequest = {
+    action: string;
+    number: number;
+    pull_request: WebhookPayloadPullRequestPullRequest;
+};
