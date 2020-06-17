@@ -1,0 +1,11 @@
+# Dependency directory
+node_modules
+
+# Trash
+.DS_Store
+
+# IDE
+.vscode/*
+.idea
+
+package-lock.json

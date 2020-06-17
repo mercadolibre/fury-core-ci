@@ -126,7 +126,8 @@ async function run() {
             name: pr.title,
             body: pr.body,
             draft: false,
-            prerelease: preRelease
+            prerelease: preRelease,
+            target_commitish: preRelease ? pr.head.ref : pr.base.ref
         });
         if (createReleaseResponse.status !== 201 && prNumber > 0) {
             core.setFailed('Failed to create release');
