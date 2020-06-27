@@ -10179,59 +10179,63 @@ function run() {
                 core.setFailed('Failed to create release');
                 return;
             }
+            core.setOutput("new_tag", newTag);
+            core.setOutput("pre_release", preRelease);
             // Update Changelog:
-            if (!preRelease) {
-                const resp = yield octokit.pulls.listCommits({
-                    owner,
-                    repo,
-                    pull_number: pr.number,
-                });
-                const commits = resp.data;
-                const contributors = Array.from(new Set(commits.map(commit => commit.author.login))).map(author => `- [@${author}](https://github.com/${author})`);
-                const msg = `## [${newTag}](https://github.com/${owner}/${repo}/tree/${newTag}) - ${dayjs().format('YYYY-MM-DD')}
-### ${pr.title}
-${pr.body}
-#### Pull Request [#${pr.number}](https://github.com/${owner}/${repo}/pull/${pr.number})
-#### Contributors
-${contributors.join("\n")}
-`;
-                updateFile('CHANGELOG.md', (v) => {
-                    const insert = v.indexOf('##');
-                    if (insert == -1) {
-                        return v + `\n${msg}\n\n`;
-                    }
-                    return v.substring(0, insert) + `${msg}\n\n` + v.substring(insert);
-                });
-                yield sh('git config user.name "Tagging Workflow"');
-                yield sh('git config user.email "<>"');
-                yield sh(`git checkout -b chore/changelog-${newTag}`);
-                yield sh('git add CHANGELOG.md');
-                yield sh('git commit -m "Update CHANGELOG.md"');
-                yield sh(`git push --set-upstream origin chore/changelog-${newTag}`);
-                const response = yield octokit.pulls.create({
-                    base: "master",
-                    body: "Update CHANGELOG.md",
-                    draft: false,
-                    head: `chore/changelog-${newTag}`,
-                    maintainer_can_modify: true,
-                    owner,
-                    repo,
-                    title: `Update CHANGELOG.md for version ${newTag}`
-                });
-                // await octokit.pulls.createReview({
-                //     body: "Auto approved",
-                //     event: "APPROVE",
-                //     owner,
-                //     pull_number: response.data.number,
-                //     repo,
-                // })
-                // await octokit.pulls.merge({
-                //     merge_method: 'rebase',
-                //     pull_number: response.data.number,
-                //     owner,
-                //     repo
-                // })
-            }
+            //         if (!preRelease) {
+            //             const resp = await octokit.pulls.listCommits({
+            //                 owner,
+            //                 repo,
+            //                 pull_number: pr.number,
+            //             })
+            //             const commits = resp.data
+            //             const contributors = Array.from(new Set(commits.map(commit => commit.author.login))).map(author => `- [@${author}](https://github.com/${author})`)
+            //
+            //             const msg = `## [${newTag}](https://github.com/${owner}/${repo}/tree/${newTag}) - ${dayjs().format('YYYY-MM-DD')}
+            // ### ${pr.title}
+            // ${pr.body}
+            // #### Pull Request [#${pr.number}](https://github.com/${owner}/${repo}/pull/${pr.number})
+            // #### Contributors
+            // ${contributors.join("\n")}
+            // `
+            //             updateFile('CHANGELOG.md', (v) => {
+            //                 const insert = v.indexOf('##')
+            //                 if (insert == -1) {
+            //                     return v + `\n${msg}\n\n`
+            //                 }
+            //                 return v.substring(0, insert) + `${msg}\n\n` + v.substring(insert)
+            //             })
+            //
+            //             await sh('git config user.name "Tagging Workflow"')
+            //             await sh('git config user.email "<>"')
+            //             await sh(`git checkout -b chore/changelog-${newTag}`)
+            //             await sh('git add CHANGELOG.md')
+            //             await sh('git commit -m "Update CHANGELOG.md"')
+            //             await sh(`git push --set-upstream origin chore/changelog-${newTag}`)
+            //             const response = await octokit.pulls.create({
+            //                 base: "master",
+            //                 body: "Update CHANGELOG.md",
+            //                 draft: false,
+            //                 head: `chore/changelog-${newTag}`,
+            //                 maintainer_can_modify: true,
+            //                 owner,
+            //                 repo,
+            //                 title: `Update CHANGELOG.md for version ${newTag}`
+            //             })
+            //             // await octokit.pulls.createReview({
+            //             //     body: "Auto approved",
+            //             //     event: "APPROVE",
+            //             //     owner,
+            //             //     pull_number: response.data.number,
+            //             //     repo,
+            //             // })
+            //             // await octokit.pulls.merge({
+            //             //     merge_method: 'rebase',
+            //             //     pull_number: response.data.number,
+            //             //     owner,
+            //             //     repo
+            //             // })
+            //         }
             // Create comment
             const params = {
                 repo,
@@ -10240,10 +10244,6 @@ ${contributors.join("\n")}
                 body: `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created.`
             };
             const new_comment = yield octokit.issues.createComment(params);
-            // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
-            // core.setOutput('id', releaseId);
-            // core.setOutput('html_url', htmlUrl);
-            // core.setOutput('upload_url', uploadUrl);
         }
         catch (error) {
             core.setFailed(error.message);
