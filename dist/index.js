@@ -10133,27 +10133,18 @@ function run() {
             if (pattern.bump == 'chore') {
                 return;
             }
-            // Get existing tags
-            const tags = yield octokit.repos.listTags({
-                owner,
-                repo,
-                per_page: 100
-            });
             let newTag = "";
-            core.info('tags:');
-            core.info(tags.data.map(tag => tag.name));
             // Find last valid tag (not RC)
-            const fullReleases = tags.data.filter(tag => !semver.prerelease(tag.name) && semver.valid(tag.name) === tag.name);
-            const firstValid = fullReleases.find(tag => semver.valid(tag.name));
-            core.info(`firstValid: ${firstValid && firstValid.name}`);
-            let lastTag = firstValid ? firstValid.name : '0.0.0';
+            let lastTag = yield getLastTag();
+            lastTag = lastTag ? lastTag : '0.0.0';
+            core.info(`lastTag: ${lastTag}`);
             const bump = `${prefix}${pattern.bump}`;
             if (preRelease) {
                 const rcName = `rc-${branch.replace('/', '-')}`;
-                const rcs = tags.data.filter(tag => tag.name.includes(rcName));
-                if (rcs.length !== 0) {
+                const lastRC = yield getLastRC(rcName);
+                if (lastRC) {
                     // increase RC number
-                    newTag = semver.inc(rcs[0].name, 'prerelease');
+                    newTag = semver.inc(lastRC, 'prerelease');
                 }
                 else {
                     // create RC
@@ -10206,12 +10197,12 @@ function run() {
             //                 return v.substring(0, insert) + `${msg}\n\n` + v.substring(insert)
             //             })
             //
-            //             await sh('git config user.name "Tagging Workflow"')
-            //             await sh('git config user.email "<>"')
-            //             await sh(`git checkout -b chore/changelog-${newTag}`)
-            //             await sh('git add CHANGELOG.md')
-            //             await sh('git commit -m "Update CHANGELOG.md"')
-            //             await sh(`git push --set-upstream origin chore/changelog-${newTag}`)
+            //             await bash('git config user.name "Tagging Workflow"')
+            //             await bash('git config user.email "<>"')
+            //             await bash(`git checkout -b chore/changelog-${newTag}`)
+            //             await bash('git add CHANGELOG.md')
+            //             await bash('git commit -m "Update CHANGELOG.md"')
+            //             await bash(`git push --set-upstream origin chore/changelog-${newTag}`)
             //             const response = await octokit.pulls.create({
             //                 base: "master",
             //                 body: "Update CHANGELOG.md",
@@ -10266,7 +10257,7 @@ function addLabel(pr) {
         });
     });
 }
-function sh(cmd) {
+function bash(cmd) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise(function (resolve, reject) {
             Object(child_process__WEBPACK_IMPORTED_MODULE_0__.exec)(cmd, (err, stdout, stderr) => {
@@ -10278,6 +10269,18 @@ function sh(cmd) {
                 }
             });
         });
+    });
+}
+function getLastTag() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const rev = yield bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | sort -V | tail -1`);
+        return rev.stdout.trim();
+    });
+}
+function getLastRC(name) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const rev = yield bash(`git tag  | grep -E '${name}' | sort -V | tail -1`);
+        return rev.stdout.trim();
     });
 }
 function updateFile(file, update) {
