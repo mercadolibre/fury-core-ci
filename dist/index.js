@@ -10133,6 +10133,8 @@ function run() {
             if (pattern.bump == 'chore') {
                 return;
             }
+            // Tagging
+            yield bash(`git fetch --prune --tags`);
             let newTag = "";
             // Find last valid tag (not RC)
             let lastTag = yield getLastTag();

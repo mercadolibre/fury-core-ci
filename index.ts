@@ -89,6 +89,8 @@ async function run() {
             return
         }
 
+        // Tagging
+        await bash(`git fetch --prune --tags`)
         let newTag = ""
         // Find last valid tag (not RC)
         let lastTag = await getLastTag()
