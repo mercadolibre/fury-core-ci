@@ -10138,10 +10138,10 @@ function run() {
             core.info(fetcht.stdout);
             const count = yield bash('git tag | wc -l');
             core.info(`total: ${count.stdout}`);
-            const semvercount = yield bash('git tag  | grep -E \'^\\d+\' | wc -l');
+            const semvercount = yield bash('git tag  | grep -E \'^\\d+\' ');
             core.info(semvercount.stdout);
-            const sermvers = yield bash(`git tag | sort -V | head -10`);
-            core.info(sermvers.stdout);
+            // const sermvers = await bash(`git tag | sort -V | head -10`);
+            // core.info(sermvers.stdout)
             let newTag = "";
             // Find last valid tag (not RC)
             let lastTag = yield getLastTag();
