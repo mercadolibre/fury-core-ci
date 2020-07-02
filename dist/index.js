@@ -10134,8 +10134,6 @@ function run() {
                 return;
             }
             // Tagging
-            core.info(yield bash('git tag | wc -l'));
-            core.info(yield bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`));
             yield bash(`git fetch --prune --tags`);
             let newTag = "";
             // Find last valid tag (not RC)
@@ -10277,7 +10275,7 @@ function bash(cmd) {
 }
 function getLastTag() {
     return __awaiter(this, void 0, void 0, function* () {
-        const rev = yield bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | sort -V | tail -1`);
+        const rev = yield bash(`git tag  | grep -E '^[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -1`);
         return rev.stdout.trim();
     });
 }

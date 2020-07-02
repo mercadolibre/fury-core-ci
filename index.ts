@@ -90,10 +90,6 @@ async function run() {
         }
 
         // Tagging
-        core.info(await bash('git tag | wc -l'))
-        core.info(await bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`))
-
-
         await bash(`git fetch --prune --tags`)
         let newTag = ""
         // Find last valid tag (not RC)
@@ -229,7 +225,7 @@ async function bash(cmd) {
     });
 }
 async function getLastTag() :Promise<string> {
-    const rev = await bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | sort -V | tail -1`)
+    const rev = await bash(`git tag  | grep -E '^[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -1`)
     return rev.stdout.trim()
 }
 async function getLastRC(name:string) :Promise<string> {
