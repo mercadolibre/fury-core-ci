@@ -90,8 +90,8 @@ async function run() {
         }
 
         // Tagging
-        await bash(`git fetch --prune --tags`)
-
+        const fetcht  = await bash(`git fetch --prune --tags`)
+        core.info(fetcht.stdout)
         const count = await bash('git tag | wc -l');
         core.info(count.stdout)
         const semvercount = await bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`);

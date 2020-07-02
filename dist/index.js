@@ -10134,7 +10134,8 @@ function run() {
                 return;
             }
             // Tagging
-            yield bash(`git fetch --prune --tags`);
+            const fetcht = yield bash(`git fetch --prune --tags`);
+            core.info(fetcht.stdout);
             const count = yield bash('git tag | wc -l');
             core.info(count.stdout);
             const semvercount = yield bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`);
