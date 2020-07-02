@@ -10134,6 +10134,8 @@ function run() {
                 return;
             }
             // Tagging
+            core.info(yield bash('git tag | wc -l'));
+            core.info(yield bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`));
             yield bash(`git fetch --prune --tags`);
             let newTag = "";
             // Find last valid tag (not RC)

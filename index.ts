@@ -90,6 +90,10 @@ async function run() {
         }
 
         // Tagging
+        core.info(await bash('git tag | wc -l'))
+        core.info(await bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`))
+
+
         await bash(`git fetch --prune --tags`)
         let newTag = ""
         // Find last valid tag (not RC)
