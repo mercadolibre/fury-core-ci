@@ -90,16 +90,13 @@ async function run() {
         }
 
         // Tagging
-        const fetcht  = await bash(`git fetch --prune --tags`)
-        core.info(fetcht.stdout)
+        await bash(`git fetch --prune --tags`)
+
+
         const count = await bash('git tag | wc -l');
         core.info(`total: ${count.stdout}`)
-        let out = await bash(`git tag  | grep -E "\."`);
+        let out = await bash(`git tag  | grep -E "\\."`);
         core.info(out.stdout)
-        out = await bash(`git tag  | grep -E "rc-"`);
-        core.info(out.stdout)
-        // const sermvers = await bash(`git tag | sort -V | head -10`);
-        // core.info(sermvers.stdout)
 
 
 

@@ -10134,16 +10134,11 @@ function run() {
                 return;
             }
             // Tagging
-            const fetcht = yield bash(`git fetch --prune --tags`);
-            core.info(fetcht.stdout);
+            yield bash(`git fetch --prune --tags`);
             const count = yield bash('git tag | wc -l');
             core.info(`total: ${count.stdout}`);
-            let out = yield bash(`git tag  | grep -E "\."`);
+            let out = yield bash(`git tag  | grep -E "\\."`);
             core.info(out.stdout);
-            out = yield bash(`git tag  | grep -E "rc-"`);
-            core.info(out.stdout);
-            // const sermvers = await bash(`git tag | sort -V | head -10`);
-            // core.info(sermvers.stdout)
             let newTag = "";
             // Find last valid tag (not RC)
             let lastTag = yield getLastTag();
