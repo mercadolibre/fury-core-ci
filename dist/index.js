@@ -10134,11 +10134,13 @@ function run() {
                 return;
             }
             // Tagging
+            yield bash(`git fetch --prune --tags`);
             const count = yield bash('git tag | wc -l');
             core.info(count.stdout);
             const semvercount = yield bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`);
             core.info(semvercount.stdout);
-            yield bash(`git fetch --prune --tags`);
+            const sermvers = yield bash(`git tag | sort -V | head -10`);
+            core.info(sermvers.stdout);
             let newTag = "";
             // Find last valid tag (not RC)
             let lastTag = yield getLastTag();

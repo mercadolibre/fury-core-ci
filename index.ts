@@ -90,13 +90,17 @@ async function run() {
         }
 
         // Tagging
+        await bash(`git fetch --prune --tags`)
+
         const count = await bash('git tag | wc -l');
         core.info(count.stdout)
         const semvercount = await bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`);
         core.info(semvercount.stdout)
+        const sermvers = await bash(`git tag | sort -V | head -10`);
+        core.info(sermvers.stdout)
 
 
-        await bash(`git fetch --prune --tags`)
+
         let newTag = ""
         // Find last valid tag (not RC)
         let lastTag = await getLastTag()
