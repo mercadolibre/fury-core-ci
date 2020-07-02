@@ -10138,9 +10138,9 @@ function run() {
             core.info(fetcht.stdout);
             const count = yield bash('git tag | wc -l');
             core.info(`total: ${count.stdout}`);
-            let out = yield bash(`git tag  | grep -E "^\\d+"`);
+            let out = yield bash(`git tag  | grep -E "\."`);
             core.info(out.stdout);
-            out = yield bash(`git tag  | grep -E "^[0-9]+\\.[0-9]+\\.[0-9]+$"`);
+            out = yield bash(`git tag  | grep -E "rc-"`);
             core.info(out.stdout);
             // const sermvers = await bash(`git tag | sort -V | head -10`);
             // core.info(sermvers.stdout)
@@ -10284,7 +10284,7 @@ function bash(cmd) {
 }
 function getLastTag() {
     return __awaiter(this, void 0, void 0, function* () {
-        const rev = yield bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | sort -V | tail -1`);
+        const rev = yield bash(`git tag  | grep -E '^[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -1`);
         return rev.stdout.trim();
     });
 }

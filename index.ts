@@ -94,9 +94,9 @@ async function run() {
         core.info(fetcht.stdout)
         const count = await bash('git tag | wc -l');
         core.info(`total: ${count.stdout}`)
-        let out = await bash(`git tag  | grep -E "^\\d+"`);
+        let out = await bash(`git tag  | grep -E "\."`);
         core.info(out.stdout)
-        out = await bash(`git tag  | grep -E "^[0-9]+\\.[0-9]+\\.[0-9]+$"`);
+        out = await bash(`git tag  | grep -E "rc-"`);
         core.info(out.stdout)
         // const sermvers = await bash(`git tag | sort -V | head -10`);
         // core.info(sermvers.stdout)
@@ -237,7 +237,7 @@ async function bash(cmd) {
     });
 }
 async function getLastTag() :Promise<string> {
-    const rev = await bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | sort -V | tail -1`)
+    const rev = await bash(`git tag  | grep -E '^[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -1`)
     return rev.stdout.trim()
 }
 async function getLastRC(name:string) :Promise<string> {
