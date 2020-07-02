@@ -91,15 +91,6 @@ async function run() {
 
         // Tagging
         await bash(`git fetch --prune --tags`)
-
-
-        const count = await bash('git tag | wc -l');
-        core.info(`total: ${count.stdout}`)
-        let out = await bash(`git tag  | grep -E "\\."`);
-        core.info(out.stdout)
-
-
-
         let newTag = ""
         // Find last valid tag (not RC)
         let lastTag = await getLastTag()

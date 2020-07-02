@@ -10135,10 +10135,6 @@ function run() {
             }
             // Tagging
             yield bash(`git fetch --prune --tags`);
-            const count = yield bash('git tag | wc -l');
-            core.info(`total: ${count.stdout}`);
-            let out = yield bash(`git tag  | grep -E "\\."`);
-            core.info(out.stdout);
             let newTag = "";
             // Find last valid tag (not RC)
             let lastTag = yield getLastTag();
