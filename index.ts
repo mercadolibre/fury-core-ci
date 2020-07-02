@@ -90,8 +90,10 @@ async function run() {
         }
 
         // Tagging
-        core.info(await bash('git tag | wc -l'))
-        core.info(await bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`))
+        const count = await bash('git tag | wc -l');
+        core.info(count.stdout)
+        const semvercount = await bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`);
+        core.info(semvercount.stdout)
 
 
         await bash(`git fetch --prune --tags`)
