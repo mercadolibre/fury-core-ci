@@ -10138,11 +10138,9 @@ function run() {
             core.info(fetcht.stdout);
             const count = yield bash('git tag | wc -l');
             core.info(`total: ${count.stdout}`);
-            let out = yield bash(`git tag  | grep -E \"^\\d+\"`);
+            let out = yield bash(`git tag  | grep -E "^\\d+"`);
             core.info(out.stdout);
-            out = yield bash(`git tag  | grep -E "^[0-9]+"`);
-            core.info(out.stdout);
-            out = yield bash(`git tag  | grep -E \'^[0-9]+\'`);
+            out = yield bash(`git tag  | grep -E "^[0-9]+\\.[0-9]+\\.[0-9]+$"`);
             core.info(out.stdout);
             // const sermvers = await bash(`git tag | sort -V | head -10`);
             // core.info(sermvers.stdout)
