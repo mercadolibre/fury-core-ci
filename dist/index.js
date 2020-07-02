@@ -10138,7 +10138,7 @@ function run() {
             core.info(fetcht.stdout);
             const count = yield bash('git tag | wc -l');
             core.info(count.stdout);
-            const semvercount = yield bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`);
+            const semvercount = yield bash('git tag  | grep -E \'^\\d+\\.\\d+\\.\\d+$\' | wc -l');
             core.info(semvercount.stdout);
             const sermvers = yield bash(`git tag | sort -V | head -10`);
             core.info(sermvers.stdout);

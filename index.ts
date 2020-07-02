@@ -94,7 +94,7 @@ async function run() {
         core.info(fetcht.stdout)
         const count = await bash('git tag | wc -l');
         core.info(count.stdout)
-        const semvercount = await bash(`git tag  | grep -E '^\\d+\\.\\d+\\.\\d+$' | wc -l`);
+        const semvercount = await bash('git tag  | grep -E \'^\\d+\\.\\d+\\.\\d+$\' | wc -l');
         core.info(semvercount.stdout)
         const sermvers = await bash(`git tag | sort -V | head -10`);
         core.info(sermvers.stdout)
