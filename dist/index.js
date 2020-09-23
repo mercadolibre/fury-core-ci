@@ -10060,10 +10060,10 @@ const Github = __webpack_require__(469);
 const semver = __webpack_require__(876);
 const fs = __webpack_require__(747);
 const branchTypes = [
-    { pattern: /^fix\/.*/, bump: "patch", label: "fix" },
-    { pattern: /^feature\/.*/, bump: "minor", label: "feature" },
-    { pattern: /^release\/.*/, bump: "major", label: "release" },
-    { pattern: /^chore\/.*/, bump: "chore", label: "chore" },
+    { pattern: /^(\w*:)?fix\/.*/, bump: "patch", label: "fix" },
+    { pattern: /^(\w*:)?feature\/.*/, bump: "minor", label: "feature" },
+    { pattern: /^(\w*:)?release\/.*/, bump: "major", label: "release" },
+    { pattern: /^(\w*:)?chore\/.*/, bump: "chore", label: "chore" },
 ];
 const token = process.env['GITHUB_TOKEN'];
 const octokit = new Github.GitHub(token);
@@ -10127,7 +10127,7 @@ function run() {
             const pattern = branchTypes.find(branchPat => branchPat.pattern.test(branch));
             // Branch name validation:
             if (!pattern) {
-                core.warning('branch pattern not expected, skipping');
+                core.setFailed('Invalid branch name pattern');
                 return;
             }
             if (pattern.bump == 'chore') {
@@ -10142,7 +10142,7 @@ function run() {
             core.info(`lastTag: ${lastTag}`);
             const bump = `${prefix}${pattern.bump}`;
             if (preRelease) {
-                const rcName = `rc-${branch.replace('/', '-')}`;
+                const rcName = `rc-${branch.replace(/[\/:]/g, '-')}`;
                 const lastRC = yield getLastRC(rcName);
                 if (lastRC) {
                     // increase RC number
