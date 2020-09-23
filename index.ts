@@ -202,7 +202,7 @@ async function addLabel(pr: WebhookPayloadPullRequestPullRequest) {
     const pattern = branchTypes.find(branchPat => branchPat.pattern.test(pr.head.ref))
     // Branch name validation:
     if (!pattern) {
-        core.warning('branch pattern not expected, skipping')
+        core.setFailed('Invalid branch name pattern')
         return
     }
     await octokit.issues.addLabels({
