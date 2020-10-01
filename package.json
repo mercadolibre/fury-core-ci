@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/mercadolibre/fury-core-actions#readme",
   "dependencies": {
-    "@actions/core": "^1.1.1",
+    "@actions/core": "^1.2.6",
     "@actions/github": "^2.1.1",
     "dayjs": "^1.8.26",
     "semver": "^7.1.3"
