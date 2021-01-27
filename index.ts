@@ -66,7 +66,7 @@ async function run() {
             return
         }
         if (!allowedBaseBranch.test(pr.base.ref)) {
-            core.info('PR not to master, skipping')
+            core.info(`PR not to master (${pr.base.ref}), skipping`)
             return
         }
         if (pr.draft) {
