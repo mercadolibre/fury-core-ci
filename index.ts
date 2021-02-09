@@ -191,7 +191,7 @@ async function run() {
             repo,
             issue_number: prNumber,
             owner,
-            body: `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created.`
+            body: `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/mercadolibre/${repo})`
         };
         const new_comment = await octokit.issues.createComment(params);
     } catch (error) {
