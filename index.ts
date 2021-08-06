@@ -118,7 +118,7 @@ async function run() {
             repo,
             tag_name: newTag,
             name: pr.title,
-            body: pr.body,
+            body: pr.body || `PR #${pr.number}`,
             draft: false,
             prerelease: preRelease,
             target_commitish: preRelease ? pr.head.ref : pr.base.ref
