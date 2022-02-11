@@ -131,61 +131,6 @@ async function run() {
         core.setOutput("new_tag", newTag);
         core.setOutput("pre_release", preRelease);
 
-        // Update Changelog:
-//         if (!preRelease) {
-//             const resp = await octokit.pulls.listCommits({
-//                 owner,
-//                 repo,
-//                 pull_number: pr.number,
-//             })
-//             const commits = resp.data
-//             const contributors = Array.from(new Set(commits.map(commit => commit.author.login))).map(author => `- [@${author}](https://github.com/${author})`)
-//
-//             const msg = `## [${newTag}](https://github.com/${owner}/${repo}/tree/${newTag}) - ${dayjs().format('YYYY-MM-DD')}
-// ### ${pr.title}
-// ${pr.body}
-// #### Pull Request [#${pr.number}](https://github.com/${owner}/${repo}/pull/${pr.number})
-// #### Contributors
-// ${contributors.join("\n")}
-// `
-//             updateFile('CHANGELOG.md', (v) => {
-//                 const insert = v.indexOf('##')
-//                 if (insert == -1) {
-//                     return v + `\n${msg}\n\n`
-//                 }
-//                 return v.substring(0, insert) + `${msg}\n\n` + v.substring(insert)
-//             })
-//
-//             await bash('git config user.name "Tagging Workflow"')
-//             await bash('git config user.email "<>"')
-//             await bash(`git checkout -b chore/changelog-${newTag}`)
-//             await bash('git add CHANGELOG.md')
-//             await bash('git commit -m "Update CHANGELOG.md"')
-//             await bash(`git push --set-upstream origin chore/changelog-${newTag}`)
-//             const response = await octokit.pulls.create({
-//                 base: "master",
-//                 body: "Update CHANGELOG.md",
-//                 draft: false,
-//                 head: `chore/changelog-${newTag}`,
-//                 maintainer_can_modify: true,
-//                 owner,
-//                 repo,
-//                 title: `Update CHANGELOG.md for version ${newTag}`
-//             })
-//             // await octokit.pulls.createReview({
-//             //     body: "Auto approved",
-//             //     event: "APPROVE",
-//             //     owner,
-//             //     pull_number: response.data.number,
-//             //     repo,
-//             // })
-//             // await octokit.pulls.merge({
-//             //     merge_method: 'rebase',
-//             //     pull_number: response.data.number,
-//             //     owner,
-//             //     repo
-//             // })
-//         }
         // Create comment
         const params = {
             repo,
