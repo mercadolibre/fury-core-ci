@@ -1,4 +1,4 @@
-name: Create release candidate tag
+name: Create Release Candidate Tag
 on:
   issue_comment:
     types: [created]
