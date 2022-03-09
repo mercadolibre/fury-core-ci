@@ -1,8 +1,7 @@
-# Auto tag
-when merging to master
+# Generate Auto Tag
 
-# RC
-when pushing to branch with name pattern
+When merging to master.
 
+# RC Tag
 
-## Labels
+When pushing to branch into a PR with name pattern.
