@@ -11,13 +11,8 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-    - shell: bash
-      run: | 
-        git config --global url."git@github.com:".insteadOf "https://github.com/" 
     - name: Push RC tag
       uses: mercadolibre/fury-core-ci@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - shell: bash
-      run: | 
-        git config --global url."git@github.com:".insteadOf "https://github.com/"   
+        
