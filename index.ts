@@ -90,8 +90,6 @@ async function run() {
             return
         }
 
-        // Set up GitHub configuration
-        await bash(`git config --global url."git@github.com:".insteadOf "https://github.com/"`)
         // Tagging
         await bash(`git fetch --prune --tags`)
         let newTag = ""
