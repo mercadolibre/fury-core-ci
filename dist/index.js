@@ -10734,8 +10734,6 @@ function run() {
             if (pattern.bump == 'chore') {
                 return;
             }
-            // Set up GitHub configuration
-            yield bash(`git config --global url."git@github.com:".insteadOf "https://github.com/"`);
             // Tagging
             yield bash(`git fetch --prune --tags`);
             let newTag = "";
