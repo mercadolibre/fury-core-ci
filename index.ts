@@ -16,6 +16,7 @@ const branchTypes: Array<BranchType> = [
     {pattern: /^(\w*:)?feature\/.*/, bump: "minor", label: "feature"},
     {pattern: /^(\w*:)?release\/.*/, bump: "major", label: "release"},
     {pattern: /^(\w*:)?chore\/.*/, bump: "chore", label: "chore"},
+    {pattern: /^revert-\d+-.*/, bump: "patch", label: "revert"},
 ]
 
 const token = process.env['GITHUB_TOKEN']
