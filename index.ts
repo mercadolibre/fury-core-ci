@@ -20,6 +20,7 @@ const branchTypes: Array<BranchType> = [
 ]
 
 const token = process.env['GITHUB_TOKEN']
+const versionPrefix = process.env['VERSION_PREFIX'] || ""
 const octokit = new Github.GitHub(token);
 const {owner, repo} = Github.context.repo
 
