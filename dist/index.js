@@ -13037,7 +13037,7 @@ function bash(cmd) {
 }
 function getLastTag() {
     return __awaiter(this, void 0, void 0, function* () {
-        const rev = yield bash(`git tag  | grep -E '^[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -1`);
+        const rev = yield bash(`git tag  | grep -E '^${versionPrefix}[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -1`);
         return rev.stdout.trim();
     });
 }
