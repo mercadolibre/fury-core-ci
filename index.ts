@@ -125,7 +125,7 @@ async function bash(cmd) {
     });
 }
 async function getLastTag() :Promise<string> {
-    const rev = await bash(`git tag  | grep -E '^[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -1`)
+    const rev = await bash(`git tag  | grep -E '^${versionPrefix}[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -1`)
     return rev.stdout.trim()
 }
 async function getLastRC(name:string) :Promise<string> {
