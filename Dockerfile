@@ -1,9 +1,25 @@
-FROM alpine
+FROM gcr.io/kaniko-project/executor:debug AS kaniko
 
-COPY ./semver ./contrib/semver
-RUN install ./contrib/semver /usr/local/bin
-COPY entrypoint.sh /entrypoint.sh
+FROM bash:latest
 
-RUN apk update && apk add bash git curl jq
+RUN apk add --no-cache \
+  curl \
+  git \
+  jq
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Create kaniko directory with world write permission to allow non root run
+RUN ["sh", "-c", "mkdir -p /kaniko && chmod 777 /kaniko"]
+
+COPY --from=kaniko /kaniko/ /kaniko/
+COPY --from=kaniko /etc/nsswitch.conf /etc/nsswitch.conf
+
+ENV HOME /root
+ENV USER root
+ENV PATH="${PATH}:/kaniko"
+ENV SSL_CERT_DIR=/kaniko/ssl/certs
+ENV DOCKER_CONFIG /kaniko/.docker/
+ENV DOCKER_CREDENTIAL_GCR_CONFIG /kaniko/.config/gcloud/docker_credential_gcr_config.json
+
+WORKDIR /workspace
+
+ENTRYPOINT ["/kaniko/executor"]
