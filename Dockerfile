@@ -2,10 +2,7 @@ FROM gcr.io/kaniko-project/executor:debug AS kaniko
 
 FROM bash:latest
 
-RUN apk add --no-cache \
-  curl \
-  git \
-  jq
+RUN apk add --no-cache curl git jq openssh
 
 # Create kaniko directory with world write permission to allow non root run
 RUN ["sh", "-c", "mkdir -p /kaniko && chmod 777 /kaniko"]
