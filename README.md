@@ -47,3 +47,10 @@ Your branchs must follow a name convention, here's a list of them:
  - `fix/.*`: labels PR as **fix** and increase the **patch** version
  - `revert-.*`: labels PR as **revert** and increase the **patch** version
  - `chore/.*`: labels PR as **chore** without incresing the version
+
+
+
+## Kaniko build
+`docker build -t mercadolibre/kaniko-fury-ci:latest .`
+
+`docker push mercadolibre/kaniko-fury-ci:latest`
