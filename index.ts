@@ -100,7 +100,7 @@ async function run() {
         core.info(`lastTag: ${lastTag}`)
         const bump = `${prefix}${pattern.bump}`
         if (preRelease) {
-            const rcName = `rc-${branch.replace(/[\/:]/g, '-')}`
+            const rcName = `rc-${branch.replace(/[\/:_]/g, '-')}`
             const lastRC = await getLastRC(rcName)
             if (lastRC) {
                 // increase RC number
