@@ -5,7 +5,7 @@ const Github = require('@actions/github');
 const semver = require('semver')
 const fs = require('fs');
 
-const allowedBaseBranch = /^([\w-]+:)?master$/
+const allowedBaseBranch = /^([\w-]+:)?(?:master|main)$/
 type BranchType = {
     pattern: RegExp,
     bump: 'patch' | 'minor' | 'major' | 'chore',
@@ -67,7 +67,7 @@ async function run() {
             return
         }
         if (!allowedBaseBranch.test(pr.base.ref)) {
-            core.info(`PR not to master (${pr.base.ref}), skipping`)
+            core.info(`PR not to allowed base branch (${pr.base.ref}), skipping`)
             return
         }
         if (pr.draft) {

@@ -12802,7 +12802,7 @@ const core = __webpack_require__(470);
 const Github = __webpack_require__(469);
 const semver = __webpack_require__(876);
 const fs = __webpack_require__(747);
-const allowedBaseBranch = /^([\w-]+:)?master$/;
+const allowedBaseBranch = /^([\w-]+:)?(?:master|main)$/;
 const branchTypes = [
     { pattern: /^(\w*:)?fix\/.*/, bump: "patch", label: "fix" },
     { pattern: /^(\w*:)?feature\/.*/, bump: "minor", label: "feature" },
@@ -12857,7 +12857,7 @@ function run() {
                 return;
             }
             if (!allowedBaseBranch.test(pr.base.ref)) {
-                core.info(`PR not to master (${pr.base.ref}), skipping`);
+                core.info(`PR not to allowed base branch (${pr.base.ref}), skipping`);
                 return;
             }
             if (pr.draft) {
