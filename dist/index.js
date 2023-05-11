@@ -12193,7 +12193,7 @@ const core = __webpack_require__(470);
 const Github = __webpack_require__(469);
 const semver = __webpack_require__(876);
 const fs = __webpack_require__(747);
-const allowedBaseBranch = /^([\w-]+:)?master$/;
+const allowedBaseBranch = /^([\w-]+:)?((master)|(develop))$/;
 const branchTypes = [
     { pattern: /^(\w*:)?fix\/.*/, bump: "patch", label: "fix" },
     { pattern: /^(\w*:)?feature\/.*/, bump: "minor", label: "feature" },
