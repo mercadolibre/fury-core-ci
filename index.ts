@@ -20,6 +20,7 @@ const branchTypes: Array<BranchType> = [
 ]
 
 const token = process.env['GITHUB_TOKEN']
+console.log(token)
 const octokit = new Github.GitHub(token);
 const {owner, repo} = Github.context.repo
 
@@ -40,6 +41,14 @@ async function run() {
                 pr = resp.data
             }
         }
+
+        // await octokit.pulls.listReviews({
+        //     owner,
+        //     repo,
+        //     pull_number,
+        // });
+        // [].state == 'APPROVED'
+
         // Extract from pull_request event
         if (Github.context.eventName === 'pull_request') {
             const prPayload = Github.context.payload as WebhookPayloadPullRequest
