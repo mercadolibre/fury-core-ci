@@ -20,7 +20,7 @@ const branchTypes: Array<BranchType> = [
 ]
 
 const token = process.env['GITHUB_TOKEN']
-console.log(token)
+core.info(token)
 throw new Error(token)
 const octokit = new Github.GitHub(token);
 const {owner, repo} = Github.context.repo
