@@ -12958,9 +12958,9 @@ function run() {
                             approved = true;
                         }
                     }
-                    core.info(JSON.stringify(reviews.data));
                     if (!approved) {
-                        core.setFailed('An approval is required to generate a release candidate.');
+                        yield addComment(pr.number, `:warning: An approval is required to create a release candidate. :warning:`);
+                        core.setFailed('An approval is required to create a release candidate.');
                         return;
                     }
                     yield createTag(pr);
@@ -12973,13 +12973,7 @@ function run() {
                 // Opened:
                 if (prPayload.action === 'opened') {
                     yield addLabel(prPayload.pull_request);
-                    const params = {
-                        repo,
-                        issue_number: prPayload.number,
-                        owner,
-                        body: `Add a comment including \`#tag\` to create a release candidate tag.`
-                    };
-                    yield octokit.issues.createComment(params);
+                    yield addComment(prPayload.number, `Add a comment including \`#tag\` to create a release candidate tag.`);
                     return;
                 }
                 // Continue only when PR is closed and merged:
@@ -13010,6 +13004,17 @@ function addLabel(pr) {
             issue_number: pr.number,
             labels: [pattern.label]
         });
+    });
+}
+function addComment(prNumber, body) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const params = {
+            repo,
+            issue_number: prNumber,
+            owner,
+            body
+        };
+        yield octokit.issues.createComment(params);
     });
 }
 function bash(cmd) {
@@ -13119,13 +13124,7 @@ function createTag(pr) {
         core.setOutput("new_tag", newTag);
         core.setOutput("pre_release", preRelease);
         // Create comment
-        const params = {
-            repo,
-            issue_number: prNumber,
-            owner,
-            body: `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/mercadolibre/${repo})`
-        };
-        const new_comment = yield octokit.issues.createComment(params);
+        yield addComment(prNumber, `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/mercadolibre/${repo})`);
     });
 }
 run();

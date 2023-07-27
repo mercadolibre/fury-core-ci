@@ -50,9 +50,9 @@ async function run() {
                         approved = true
                     }
                 }
-                core.info(JSON.stringify(reviews.data))
                 if(!approved) {
-                    core.setFailed('An approval is required to generate a release candidate.');
+                    await addComment(pr.number, `:warning: An approval is required to create a release candidate. :warning:`);
+                    core.setFailed('An approval is required to create a release candidate.');
                     return
                 }
 
@@ -67,13 +67,7 @@ async function run() {
             // Opened:
             if (prPayload.action === 'opened') {
                 await addLabel(prPayload.pull_request)
-                const params = {
-                    repo,
-                    issue_number: prPayload.number,
-                    owner,
-                    body: `Add a comment including \`#tag\` to create a release candidate tag.`
-                };
-                await octokit.issues.createComment(params);
+                await addComment(prPayload.number, `Add a comment including \`#tag\` to create a release candidate tag.`)
                 return
             }
             // Continue only when PR is closed and merged:
@@ -102,6 +96,16 @@ async function addLabel(pr: WebhookPayloadPullRequestPullRequest) {
         issue_number: pr.number,
         labels: [pattern.label]
     })
+}
+
+async function addComment(prNumber:number, body:string) {
+    const params = {
+        repo,
+        issue_number: prNumber,
+        owner,
+        body
+    };
+    await octokit.issues.createComment(params);
 }
 
 async function bash(cmd) {
@@ -208,13 +212,7 @@ async function createTag(pr: WebhookPayloadPullRequestPullRequest) {
     core.setOutput("pre_release", preRelease);
 
     // Create comment
-    const params = {
-        repo,
-        issue_number: prNumber,
-        owner,
-        body: `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/mercadolibre/${repo})`
-    };
-    const new_comment = await octokit.issues.createComment(params);
+    await addComment(prNumber, `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/mercadolibre/${repo})`)
 }
 
 run()
