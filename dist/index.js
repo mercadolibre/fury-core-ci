@@ -12839,7 +12839,7 @@ function run() {
                             approved = true;
                         }
                     }
-                    core.setOutput(`approved`, approved);
+                    core.info(`approved: ${approved}`);
                     yield createTag(pr);
                 }
                 return;
