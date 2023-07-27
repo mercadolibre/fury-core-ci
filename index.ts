@@ -45,7 +45,7 @@ async function run() {
                     pull_number: pr.number,
                 });
                 let approved = false
-                for (const review of reviews) {
+                for (const review of reviews.data) {
                     if(review.state === 'APPROVED') {
                         approved = true
                     }
