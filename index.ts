@@ -50,7 +50,7 @@ async function run() {
                         approved = true
                     }
                 }
-                core.setOutput(`approved`, approved)
+                core.info(`approved: ${approved}`)
 
                 await createTag(pr)
             }
