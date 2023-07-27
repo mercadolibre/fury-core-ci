@@ -46,4 +46,4 @@ Your branchs must follow a name convention, here's a list of them:
    version
  - `fix/.*`: labels PR as **fix** and increase the **patch** version
  - `revert-.*`: labels PR as **revert** and increase the **patch** version
- - `chore/.*`: labels PR as **chore** without incresing the version
+ - `chore/.*`: labels PR as **chore** without increasing the version
