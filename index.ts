@@ -50,6 +50,7 @@ async function run() {
                         approved = true
                     }
                 }
+                core.info(JSON.stringify(reviews.data))
                 if(!approved) {
                     core.setFailed('An approval is required to generate a release candidate.');
                     return
