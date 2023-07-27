@@ -50,7 +50,10 @@ async function run() {
                         approved = true
                     }
                 }
-                core.info(`approved: ${approved}`)
+                if(!approved) {
+                    core.setFailed('An approval is required to generate a release candidate.');
+                    return
+                }
 
                 await createTag(pr)
             }
