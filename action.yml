@@ -11,5 +11,5 @@ outputs:
   pre_release:
     description: 'Whether it is a release candidate'
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'

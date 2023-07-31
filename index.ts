@@ -38,21 +38,36 @@ async function run() {
                     pull_number: issuePayload.issue.number,
                 })
                 pr = resp.data
+
+                const reviews = await octokit.pulls.listReviews({
+                    owner,
+                    repo,
+                    pull_number: pr.number,
+                });
+                let approved = false
+                for (const review of reviews.data) {
+                    if(review.state === 'APPROVED') {
+                        approved = true
+                    }
+                }
+                if(!approved) {
+                    await addComment(pr.number, `:warning: An approval is required to create a release candidate. :warning:`);
+                    core.setFailed('An approval is required to create a release candidate.');
+                    return
+                }
+
+                await createTag(pr)
             }
+            return
         }
+
         // Extract from pull_request event
         if (Github.context.eventName === 'pull_request') {
             const prPayload = Github.context.payload as WebhookPayloadPullRequest
             // Opened:
             if (prPayload.action === 'opened') {
                 await addLabel(prPayload.pull_request)
-                const params = {
-                    repo,
-                    issue_number: prPayload.number,
-                    owner,
-                    body: `Add a comment including \`#tag\` to create a release candidate tag.`
-                };
-                await octokit.issues.createComment(params);
+                await addComment(prPayload.number, `Add a comment including \`#tag\` to create a release candidate tag.`)
                 return
             }
             // Continue only when PR is closed and merged:
@@ -60,141 +75,9 @@ async function run() {
                 return
             }
             pr = prPayload.pull_request
-        }
-        // Additional validations
-        if (!pr) {
-            core.warning('PR not found')
+            await createTag(pr)
             return
         }
-        if (!allowedBaseBranch.test(pr.base.ref)) {
-            core.info(`PR not to allowed base branch (${pr.base.ref}), skipping`)
-            return
-        }
-        if (pr.draft) {
-            core.info('PR is a draft, skipping')
-            return
-        }
-
-        const preRelease = !pr.merged
-        const branch = pr.head.ref
-        const prNumber = pr.number
-
-        // Define tag and release name
-        const prefix = preRelease ? 'pre' : ''
-        const pattern = branchTypes.find(branchPat => branchPat.pattern.test(branch))
-        // Branch name validation:
-        if (!pattern) {
-            core.setFailed('Invalid branch name pattern');
-            return
-        }
-        if(pattern.bump == 'chore'){
-            return
-        }
-
-        // Tagging
-        await bash(`git fetch --prune --tags`)
-        let newTag = ""
-        // Find last valid tag (not RC)
-        let lastTag = await getLastTag()
-        lastTag = lastTag ? lastTag: '0.0.0'
-        core.info(`lastTag: ${lastTag}`)
-        const bump = `${prefix}${pattern.bump}`
-        if (preRelease) {
-            const rcName = `rc-${branch.replace(/[\/:_]/g, '-')}`
-            const lastRC = await getLastRC(rcName)
-            if (lastRC) {
-                // increase RC number
-                newTag = semver.inc(lastRC, 'prerelease')
-            } else {
-                // create RC
-                newTag = semver.inc(lastTag, bump, rcName)
-            }
-        } else {
-            newTag = semver.inc(lastTag, bump)
-        }
-        core.info(`newTag: ${newTag}`)
-        // Create release
-        const createReleaseResponse = await octokit.repos.createRelease({
-            owner,
-            repo,
-            tag_name: newTag,
-            name: pr.title,
-            body: pr.body || `PR #${pr.number}`,
-            draft: false,
-            prerelease: preRelease,
-            target_commitish: preRelease ? pr.head.ref : pr.base.ref
-        });
-        if (createReleaseResponse.status !== 201 && prNumber > 0) {
-            core.setFailed('Failed to create release');
-            return
-        }
-
-        core.setOutput("new_tag", newTag);
-        core.setOutput("pre_release", preRelease);
-
-        // Update Changelog:
-//         if (!preRelease) {
-//             const resp = await octokit.pulls.listCommits({
-//                 owner,
-//                 repo,
-//                 pull_number: pr.number,
-//             })
-//             const commits = resp.data
-//             const contributors = Array.from(new Set(commits.map(commit => commit.author.login))).map(author => `- [@${author}](https://github.com/${author})`)
-//
-//             const msg = `## [${newTag}](https://github.com/${owner}/${repo}/tree/${newTag}) - ${dayjs().format('YYYY-MM-DD')}
-// ### ${pr.title}
-// ${pr.body}
-// #### Pull Request [#${pr.number}](https://github.com/${owner}/${repo}/pull/${pr.number})
-// #### Contributors
-// ${contributors.join("\n")}
-// `
-//             updateFile('CHANGELOG.md', (v) => {
-//                 const insert = v.indexOf('##')
-//                 if (insert == -1) {
-//                     return v + `\n${msg}\n\n`
-//                 }
-//                 return v.substring(0, insert) + `${msg}\n\n` + v.substring(insert)
-//             })
-//
-//             await bash('git config user.name "Tagging Workflow"')
-//             await bash('git config user.email "<>"')
-//             await bash(`git checkout -b chore/changelog-${newTag}`)
-//             await bash('git add CHANGELOG.md')
-//             await bash('git commit -m "Update CHANGELOG.md"')
-//             await bash(`git push --set-upstream origin chore/changelog-${newTag}`)
-//             const response = await octokit.pulls.create({
-//                 base: "master",
-//                 body: "Update CHANGELOG.md",
-//                 draft: false,
-//                 head: `chore/changelog-${newTag}`,
-//                 maintainer_can_modify: true,
-//                 owner,
-//                 repo,
-//                 title: `Update CHANGELOG.md for version ${newTag}`
-//             })
-//             // await octokit.pulls.createReview({
-//             //     body: "Auto approved",
-//             //     event: "APPROVE",
-//             //     owner,
-//             //     pull_number: response.data.number,
-//             //     repo,
-//             // })
-//             // await octokit.pulls.merge({
-//             //     merge_method: 'rebase',
-//             //     pull_number: response.data.number,
-//             //     owner,
-//             //     repo
-//             // })
-//         }
-        // Create comment
-        const params = {
-            repo,
-            issue_number: prNumber,
-            owner,
-            body: `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/mercadolibre/${repo})`
-        };
-        const new_comment = await octokit.issues.createComment(params);
     } catch (error) {
         core.setFailed(error.message);
     }
@@ -213,6 +96,16 @@ async function addLabel(pr: WebhookPayloadPullRequestPullRequest) {
         issue_number: pr.number,
         labels: [pattern.label]
     })
+}
+
+async function addComment(prNumber:number, body:string) {
+    const params = {
+        repo,
+        issue_number: prNumber,
+        owner,
+        body
+    };
+    await octokit.issues.createComment(params);
 }
 
 async function bash(cmd) {
@@ -244,6 +137,82 @@ All notable changes to this project will be documented in this file.
     const data = fs.readFileSync(file, 'utf-8')
     const newData = update(data)
     fs.writeFileSync(file, newData, 'utf-8')
+}
+
+async function createTag(pr: WebhookPayloadPullRequestPullRequest) {
+    // Additional validations
+    if (!pr) {
+        core.warning('PR not found')
+        return
+    }
+    if (!allowedBaseBranch.test(pr.base.ref)) {
+        core.info(`PR not to allowed base branch (${pr.base.ref}), skipping`)
+        return
+    }
+    if (pr.draft) {
+        core.info('PR is a draft, skipping')
+        return
+    }
+
+    const preRelease = !pr.merged
+    const branch = pr.head.ref
+    const prNumber = pr.number
+
+    // Define tag and release name
+    const prefix = preRelease ? 'pre' : ''
+    const pattern = branchTypes.find(branchPat => branchPat.pattern.test(branch))
+    // Branch name validation:
+    if (!pattern) {
+        core.setFailed('Invalid branch name pattern');
+        return
+    }
+    if(pattern.bump == 'chore'){
+        return
+    }
+
+    // Tagging
+    await bash(`git fetch --prune --tags`)
+    let newTag = ""
+    // Find last valid tag (not RC)
+    let lastTag = await getLastTag()
+    lastTag = lastTag ? lastTag: '0.0.0'
+    core.info(`lastTag: ${lastTag}`)
+    const bump = `${prefix}${pattern.bump}`
+    if (preRelease) {
+        const rcName = `rc-${branch.replace(/[\/:_]/g, '-')}`
+        const lastRC = await getLastRC(rcName)
+        if (lastRC) {
+            // increase RC number
+            newTag = semver.inc(lastRC, 'prerelease')
+        } else {
+            // create RC
+            newTag = semver.inc(lastTag, bump, rcName)
+        }
+    } else {
+        newTag = semver.inc(lastTag, bump)
+    }
+    core.info(`newTag: ${newTag}`)
+    // Create release
+    const createReleaseResponse = await octokit.repos.createRelease({
+        owner,
+        repo,
+        tag_name: newTag,
+        name: pr.title,
+        body: pr.body || `PR #${pr.number}`,
+        draft: false,
+        prerelease: preRelease,
+        target_commitish: preRelease ? pr.head.ref : pr.base.ref
+    });
+    if (createReleaseResponse.status !== 201 && prNumber > 0) {
+        core.setFailed('Failed to create release');
+        return
+    }
+
+    core.setOutput("new_tag", newTag);
+    core.setOutput("pre_release", preRelease);
+
+    // Create comment
+    await addComment(prNumber, `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/mercadolibre/${repo})`)
 }
 
 run()
