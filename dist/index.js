@@ -12802,7 +12802,7 @@ const core = __webpack_require__(470);
 const Github = __webpack_require__(469);
 const semver = __webpack_require__(876);
 const fs = __webpack_require__(747);
-const allowedBaseBranch = /^([\w-]+:)?(?:master|main)$/;
+const allowedBaseBranch = /^([\w-]+:)?(?:master|main|develop)$/;
 const branchTypes = [
     { pattern: /^(\w*:)?fix\/.*/, bump: "patch", label: "fix" },
     { pattern: /^(\w*:)?feature\/.*/, bump: "minor", label: "feature" },
@@ -12857,6 +12857,7 @@ function run() {
                 return;
             }
             if (!allowedBaseBranch.test(pr.base.ref)) {
+                core.info(allowedBaseBranch);
                 core.info(`PR not to allowed base branch (${pr.base.ref}), skipping`);
                 return;
             }
@@ -12887,7 +12888,8 @@ function run() {
             core.info(`lastTag: ${lastTag}`);
             const bump = `${prefix}${pattern.bump}`;
             if (preRelease) {
-                const rcName = `rc-${branch.replace(/[\/:_]/g, '-')}`;
+                const prefix = pr.base.ref == 'develop' ? 'beta' : 'rc';
+                const rcName = `${prefix}-${branch.replace(/[\/:_]/g, '-')}`;
                 const lastRC = yield getLastRC(rcName);
                 if (lastRC) {
                     // increase RC number
