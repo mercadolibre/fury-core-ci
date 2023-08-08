@@ -12951,7 +12951,11 @@ function run() {
                         owner,
                         repo,
                         pull_number: pr.number,
+                        per_page: 100
                     });
+                    if (reviews.data.length === 100) {
+                        core.warning('max reviews per page, restriction may be false');
+                    }
                     let approved = false;
                     for (const review of reviews.data) {
                         if (review.state === 'APPROVED') {
