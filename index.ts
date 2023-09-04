@@ -216,7 +216,7 @@ async function createTag(pr: WebhookPayloadPullRequestPullRequest) {
     core.setOutput("pre_release", preRelease);
 
     // Create comment
-    await addComment(prNumber, `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/mercadolibre/${repo})`)
+    await addComment(prNumber, `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/melisource/${repo})`)
 }
 
 run()

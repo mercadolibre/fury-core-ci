@@ -13128,7 +13128,7 @@ function createTag(pr) {
         core.setOutput("new_tag", newTag);
         core.setOutput("pre_release", preRelease);
         // Create comment
-        yield addComment(prNumber, `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/mercadolibre/${repo})`);
+        yield addComment(prNumber, `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/melisource/${repo})`);
     });
 }
 run();
