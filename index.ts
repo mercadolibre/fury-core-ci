@@ -196,6 +196,7 @@ async function createTag(pr: WebhookPayloadPullRequestPullRequest) {
     } else {
         newTag = semver.inc(lastTag, bump)
     }
+    newTag = `${versionPrefix}${newTag}`
     core.info(`newTag: ${newTag}`)
     // Create release
     const createReleaseResponse = await octokit.repos.createRelease({

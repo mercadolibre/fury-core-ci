@@ -12930,6 +12930,7 @@ const branchTypes = [
     { pattern: /^revert-\d+-.*/, bump: "patch", label: "revert" },
 ];
 const token = process.env['GITHUB_TOKEN'];
+const versionPrefix = process.env['VERSION_PREFIX'] || "";
 const octokit = new Github.GitHub(token);
 const { owner, repo } = Github.context.repo;
 // most @actions toolkit packages have async methods
@@ -13109,6 +13110,7 @@ function createTag(pr) {
         else {
             newTag = semver.inc(lastTag, bump);
         }
+        newTag = `${versionPrefix}${newTag}`;
         core.info(`newTag: ${newTag}`);
         // Create release
         const createReleaseResponse = yield octokit.repos.createRelease({
