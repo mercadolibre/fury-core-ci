@@ -20,6 +20,7 @@ const branchTypes: Array<BranchType> = [
 ]
 
 const token = process.env['GITHUB_TOKEN']
+const versionPrefix = process.env['VERSION_PREFIX'] || ""
 const octokit = new Github.GitHub(token);
 const {owner, repo} = Github.context.repo
 
@@ -124,7 +125,7 @@ async function bash(cmd) {
     });
 }
 async function getLastTag() :Promise<string> {
-    const rev = await bash(`git tag  | grep -E '^[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -1`)
+    const rev = await bash(`git tag  | grep -E '^${versionPrefix}[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -1`)
     return rev.stdout.trim()
 }
 async function getLastRC(name:string) :Promise<string> {
@@ -195,6 +196,7 @@ async function createTag(pr: WebhookPayloadPullRequestPullRequest) {
     } else {
         newTag = semver.inc(lastTag, bump)
     }
+    newTag = `${versionPrefix}${newTag}`
     core.info(`newTag: ${newTag}`)
     // Create release
     const createReleaseResponse = await octokit.repos.createRelease({

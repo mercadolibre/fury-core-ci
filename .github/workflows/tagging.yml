@@ -15,4 +15,3 @@ jobs:
       uses: mercadolibre/fury-core-ci@dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
