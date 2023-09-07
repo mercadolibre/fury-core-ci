@@ -12948,6 +12948,18 @@ function run() {
                         pull_number: issuePayload.issue.number,
                     });
                     pr = resp.data;
+                    // Validate commit status:
+                    const commitStatus = yield octokit.repos.getCombinedStatusForRef({
+                        owner,
+                        repo,
+                        ref: pr.head.ref
+                    });
+                    core.info(JSON.stringify(commitStatus));
+                    if (commitStatus.state !== "success") {
+                        // await addComment(pr.number, `:warning: An approval is required to create a release candidate. :warning:`);
+                        // core.setFailed('An approval is required to create a release candidate.');
+                        // return
+                    }
                     // Validate approval:
                     const reviews = yield octokit.pulls.listReviews({
                         owner,
@@ -12968,18 +12980,6 @@ function run() {
                         yield addComment(pr.number, `:warning: An approval is required to create a release candidate. :warning:`);
                         core.setFailed('An approval is required to create a release candidate.');
                         return;
-                    }
-                    // Validate commit status:
-                    const commitStatus = yield octokit.repos.getCombinedStatusForRef({
-                        owner,
-                        repo,
-                        ref: pr.head.ref
-                    });
-                    core.info(JSON.stringify(commitStatus));
-                    if (commitStatus.state !== "success") {
-                        // await addComment(pr.number, `:warning: An approval is required to create a release candidate. :warning:`);
-                        // core.setFailed('An approval is required to create a release candidate.');
-                        // return
                     }
                     yield createTag(pr);
                 }
