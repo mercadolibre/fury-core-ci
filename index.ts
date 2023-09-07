@@ -48,9 +48,9 @@ async function run() {
                 })
                 core.info(JSON.stringify(commitStatus))
                 if(commitStatus.state !== "success") {
-                    // await addComment(pr.number, `:warning: An approval is required to create a release candidate. :warning:`);
-                    // core.setFailed('An approval is required to create a release candidate.');
-                    // return
+                    await addComment(pr.number, `:warning: Successful checks are required to create a release candidate. :warning:`);
+                    core.setFailed('Successful checks are required to create a release candidate.');
+                    return
                 }
 
                 // Validate approval:
