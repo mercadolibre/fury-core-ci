@@ -1,0 +1,29 @@
+name: Build
+on: workflow_dispatch
+jobs:
+  build_and_push:
+    name: Push Docker image to Docker Registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: docker-core.artifacts.furycloud.io/mercadolibre/fury-core/fury-core-ci
+
+      - uses: actions/setup-node@v2
+      - name: Build config
+        env:
+          NODE_ENV: production
+        run: yarn install --frozen-file
+
+      - run: |
+          echo "Labels: LABELS"
+          echo "Tags: $TAGS"
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          LABELS: ${{ steps.meta.outputs.labels }}
+

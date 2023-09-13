@@ -1,9 +1,16 @@
 import {exec} from 'child_process';
-const dayjs = require("dayjs");
-const core = require('@actions/core');
-const Github = require('@actions/github');
-const semver = require('semver')
-const fs = require('fs');
+import * as core from '@actions/core';
+import * as Github from '@actions/github';
+import * as semver from 'semver';
+import * as fs from 'fs';
+import {ReleaseType} from "semver";
+
+declare var process : {
+    env: {
+        GITHUB_TOKEN: string;
+        VERSION_PREFIX: string;
+    }
+}
 
 const allowedBaseBranch = /^([\w-]+:)?(?:master|main)$/
 type BranchType = {
@@ -19,29 +26,32 @@ const branchTypes: Array<BranchType> = [
     {pattern: /^revert-\d+-.*/, bump: "patch", label: "revert"},
 ]
 
-const token = process.env['GITHUB_TOKEN']
+let token = core.getInput('gh_token');
+if(token === "") {
+    token = process.env['GITHUB_TOKEN']
+}
 const versionPrefix = process.env['VERSION_PREFIX'] || ""
-const octokit = new Github.GitHub(token);
+const octokit = Github.getOctokit(token);
 const {owner, repo} = Github.context.repo
 
 // most @actions toolkit packages have async methods
 async function run() {
     try {
-        let pr: WebhookPayloadPullRequestPullRequest = null
+        let pr: WebhookPayloadPullRequestPullRequest
 
         // Extract from comment event
         if (Github.context.eventName === 'issue_comment') {
             const issuePayload = Github.context.payload
-            if (issuePayload.action === 'created' && issuePayload.comment.body.includes('#tag')) {
-                const resp = await octokit.pulls.get({
+            if (issuePayload.action === 'created' && issuePayload.comment?.body.includes('#tag')) {
+                const resp = await octokit.rest.pulls.get({
                     owner,
                     repo,
-                    pull_number: issuePayload.issue.number,
+                    pull_number: issuePayload.issue?.number,
                 })
                 pr = resp.data
 
                 // Validate commit status:
-                const commitStatus = await octokit.repos.getCombinedStatusForRef({
+                const commitStatus = await octokit.rest.repos.getCombinedStatusForRef({
                     owner,
                     repo,
                     ref: pr.head.ref
@@ -54,7 +64,7 @@ async function run() {
                 // }
 
                 // Validate approval:
-                const reviews = await octokit.pulls.listReviews({
+                const reviews = await octokit.rest.pulls.listReviews({
                     owner,
                     repo,
                     pull_number: pr.number,
@@ -75,7 +85,15 @@ async function run() {
                     return
                 }
 
-                await createTag(pr)
+                const newTag = await createTag(pr)
+
+                const dispatch = await octokit.rest.actions.createWorkflowDispatch({
+                    owner,
+                    repo,
+                    workflow_id: 'build.yml',
+                    ref: newTag,
+                })
+                core.info(JSON.stringify(dispatch))
             }
             return
         }
@@ -94,7 +112,8 @@ async function run() {
                 return
             }
             pr = prPayload.pull_request
-            await createTag(pr)
+            const newTag = await createTag(pr)
+            //todo: trigger workflow
             return
         }
     } catch (error) {
@@ -109,7 +128,7 @@ async function addLabel(pr: WebhookPayloadPullRequestPullRequest) {
         core.setFailed('Invalid branch name pattern')
         return
     }
-    await octokit.issues.addLabels({
+    await octokit.rest.issues.addLabels({
         repo,
         owner,
         issue_number: pr.number,
@@ -124,10 +143,10 @@ async function addComment(prNumber:number, body:string) {
         owner,
         body
     };
-    await octokit.issues.createComment(params);
+    await octokit.rest.issues.createComment(params);
 }
 
-async function bash(cmd) {
+async function bash(cmd:string) {
     return new Promise<{stdout: string, stderr:string}>(function (resolve, reject) {
         exec(cmd, (err, stdout, stderr) => {
             if (err) {
@@ -147,7 +166,7 @@ async function getLastRC(name:string) :Promise<string> {
     return rev.stdout.trim()
 }
 
-function updateFile(file: string, update: (string) => string) {
+function updateFile(file: string, update: (x:string) => string) {
     if (!fs.existsSync(file)) {
         fs.writeFileSync(file, `# Changelog
 All notable changes to this project will be documented in this file.
@@ -202,18 +221,18 @@ async function createTag(pr: WebhookPayloadPullRequestPullRequest) {
         const lastRC = await getLastRC(rcName)
         if (lastRC) {
             // increase RC number
-            newTag = semver.inc(lastRC, 'prerelease')
+            newTag = semver.inc(lastRC, 'prerelease' as ReleaseType)
         } else {
             // create RC
-            newTag = semver.inc(lastTag, bump, rcName)
+            newTag = semver.inc(lastTag, bump as ReleaseType, rcName)
         }
     } else {
-        newTag = semver.inc(lastTag, bump)
+        newTag = semver.inc(lastTag, bump as ReleaseType)
     }
     newTag = `${versionPrefix}${newTag}`
     core.info(`newTag: ${newTag}`)
     // Create release
-    const createReleaseResponse = await octokit.repos.createRelease({
+    const createReleaseResponse = await octokit.rest.repos.createRelease({
         owner,
         repo,
         tag_name: newTag,
@@ -233,6 +252,8 @@ async function createTag(pr: WebhookPayloadPullRequestPullRequest) {
 
     // Create comment
     await addComment(prNumber, `:label: ${preRelease ? 'Pre-release' : 'Release'} \`${newTag}\` created. [See build.](https://circleci.com/gh/melisource/${repo})`)
+
+    return newTag
 }
 
 run()
@@ -254,10 +275,10 @@ type WebhookPayloadPullRequestPullRequest = {
     created_at: string;
     updated_at: string;
     closed_at: null | string;
-    merged_at: null;
+    merged_at: null | string;
     merge_commit_sha: null | string;
-    requested_reviewers: Array<any>;
-    requested_teams: Array<any>;
+    requested_reviewers?: Array<any>;
+    requested_teams?: Array<any>;
     commits_url: string;
     review_comments_url: string;
     review_comment_url: string;
@@ -266,12 +287,12 @@ type WebhookPayloadPullRequestPullRequest = {
     head: WebhookPayloadPullRequestPullRequestHead;
     base: WebhookPayloadPullRequestPullRequestBase;
     author_association: string;
-    draft: boolean;
+    draft?: boolean;
     merged: boolean;
     mergeable: null | boolean;
-    rebaseable: null | boolean;
+    rebaseable?: null | boolean;
     mergeable_state: string;
-    merged_by: null;
+    merged_by: null|any;
     comments: number;
     review_comments: number;
     maintainer_can_modify: boolean;
