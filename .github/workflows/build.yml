@@ -12,7 +12,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: docker-core.artifacts.furycloud.io/mercadolibre/fury-core/fury-core-ci
+          flavor: |
+            latest=false
+          images: docker-core.artifacts.furycloud.io/mercadolibre/fury-core/${{ github.repository }}
 
       - uses: actions/setup-node@v2
       - name: Build config
@@ -21,7 +23,7 @@ jobs:
         run: yarn install --frozen-file
 
       - run: |
-          echo "Labels: LABELS"
+          echo "Labels: $LABELS"
           echo "Tags: $TAGS"
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
