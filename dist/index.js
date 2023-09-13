@@ -12916,13 +12916,14 @@ async function run() {
                     return;
                 }
                 const newTag = await createTag(pr);
+                // Trigger build workflow:
                 const dispatch = await octokit.rest.actions.createWorkflowDispatch({
                     owner,
                     repo,
                     workflow_id: 'build.yml',
                     ref: newTag,
                 });
-                core.info(JSON.stringify(dispatch));
+                core.info(`dispatch status: ${dispatch.status}`);
             }
             return;
         }
@@ -12941,7 +12942,14 @@ async function run() {
             }
             pr = prPayload.pull_request;
             const newTag = await createTag(pr);
-            //todo: trigger workflow
+            // Trigger build workflow:
+            const dispatch = await octokit.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id: 'build.yml',
+                ref: newTag,
+            });
+            core.info(`dispatch status: ${dispatch.status}`);
             return;
         }
     }
