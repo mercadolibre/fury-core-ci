@@ -52,12 +52,12 @@ async function run() {
                 pr = resp.data
 
                 // Validate commit status:
-                const commitStatus = await octokit.rest.repos.getCombinedStatusForRef({
-                    owner,
-                    repo,
-                    ref: pr.head.ref
-                })
-                core.info(JSON.stringify(commitStatus))
+                // const commitStatus = await octokit.rest.repos.getCombinedStatusForRef({
+                //     owner,
+                //     repo,
+                //     ref: pr.head.ref
+                // })
+                // core.info(JSON.stringify(commitStatus))
                 // if(commitStatus.state !== "success") {
                 //     await addComment(pr.number, `:warning: Successful checks are required to create a release candidate. :warning:`);
                 //     core.setFailed('Successful checks are required to create a release candidate.');
