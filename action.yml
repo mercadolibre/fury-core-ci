@@ -4,6 +4,7 @@ inputs:
   trigger-build:  # id of input
     description: 'trigger a build workflow defined in the repository actions'
     required: false
+    default: 'false'
 outputs:
   new_tag:
     description: 'Generated tag'
