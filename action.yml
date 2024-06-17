@@ -1,10 +1,9 @@
 name: 'CoreWorkflow'
 description: 'Generate tags according to core workflow'
-#inputs:
-#  milliseconds:  # id of input
-#    description: 'number of milliseconds to wait'
-#    required: true
-#    default: '1000'
+inputs:
+  trigger-build:  # id of input
+    description: 'trigger a build workflow defined in the repository actions'
+    required: false
 outputs:
   new_tag:
     description: 'Generated tag'
