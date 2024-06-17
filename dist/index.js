@@ -12853,7 +12853,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const Github = __importStar(__nccwpck_require__(5438));
 const semver = __importStar(__nccwpck_require__(1383));
 const fs = __importStar(__nccwpck_require__(7147));
-const allowedBaseBranch = /^([\w-]+:)?(?:master|main)$/;
+const allowedBaseBranch = /^([\w-]+:)?(?:master|main|develop)$/;
 const branchTypes = [
     { pattern: /^(\w*:)?fix\/.*/, bump: "patch", label: "fix" },
     { pattern: /^(\w*:)?feature\/.*/, bump: "minor", label: "feature" },
@@ -12861,6 +12861,7 @@ const branchTypes = [
     { pattern: /^(\w*:)?chore\/.*/, bump: "chore", label: "chore" },
     { pattern: /^revert-\d+-.*/, bump: "patch", label: "revert" },
 ];
+const triggerBuild = core.getBooleanInput('trigger-build');
 let token = core.getInput('gh_token');
 if (token === "") {
     token = process.env['GITHUB_TOKEN'];
@@ -12916,14 +12917,16 @@ async function run() {
                     return;
                 }
                 const newTag = await createTag(pr);
-                // Trigger build workflow:
-                const dispatch = await octokit.rest.actions.createWorkflowDispatch({
-                    owner,
-                    repo,
-                    workflow_id: 'build.yml',
-                    ref: newTag,
-                });
-                core.info(`dispatch status: ${dispatch.status}`);
+                if (triggerBuild) {
+                    // Trigger build workflow:
+                    const dispatch = await octokit.rest.actions.createWorkflowDispatch({
+                        owner,
+                        repo,
+                        workflow_id: 'build.yml',
+                        ref: newTag,
+                    });
+                    core.info(`dispatch status: ${dispatch.status}`);
+                }
             }
             return;
         }
@@ -12942,14 +12945,16 @@ async function run() {
             }
             pr = prPayload.pull_request;
             const newTag = await createTag(pr);
-            // Trigger build workflow:
-            const dispatch = await octokit.rest.actions.createWorkflowDispatch({
-                owner,
-                repo,
-                workflow_id: 'build.yml',
-                ref: newTag,
-            });
-            core.info(`dispatch status: ${dispatch.status}`);
+            if (triggerBuild) {
+                // Trigger build workflow:
+                const dispatch = await octokit.rest.actions.createWorkflowDispatch({
+                    owner,
+                    repo,
+                    workflow_id: 'build.yml',
+                    ref: newTag,
+                });
+                core.info(`dispatch status: ${dispatch.status}`);
+            }
             return;
         }
     }

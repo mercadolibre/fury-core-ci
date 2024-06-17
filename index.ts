@@ -12,7 +12,7 @@ declare var process : {
     }
 }
 
-const allowedBaseBranch = /^([\w-]+:)?(?:master|main)$/
+const allowedBaseBranch = /^([\w-]+:)?(?:master|main|develop)$/
 type BranchType = {
     pattern: RegExp,
     bump: 'patch' | 'minor' | 'major' | 'chore',
@@ -26,6 +26,7 @@ const branchTypes: Array<BranchType> = [
     {pattern: /^revert-\d+-.*/, bump: "patch", label: "revert"},
 ]
 
+const triggerBuild = core.getBooleanInput('trigger-build')
 let token = core.getInput('gh_token');
 if(token === "") {
     token = process.env['GITHUB_TOKEN']
@@ -86,14 +87,16 @@ async function run() {
                 }
 
                 const newTag = await createTag(pr)
-                // Trigger build workflow:
-                const dispatch = await octokit.rest.actions.createWorkflowDispatch({
-                    owner,
-                    repo,
-                    workflow_id: 'build.yml',
-                    ref: newTag,
-                })
-                core.info(`dispatch status: ${dispatch.status}`)
+                if(triggerBuild) {
+                    // Trigger build workflow:
+                    const dispatch = await octokit.rest.actions.createWorkflowDispatch({
+                        owner,
+                        repo,
+                        workflow_id: 'build.yml',
+                        ref: newTag,
+                    })
+                    core.info(`dispatch status: ${dispatch.status}`)
+                }
             }
             return
         }
@@ -113,14 +116,16 @@ async function run() {
             }
             pr = prPayload.pull_request
             const newTag = await createTag(pr)
-            // Trigger build workflow:
-            const dispatch = await octokit.rest.actions.createWorkflowDispatch({
-                owner,
-                repo,
-                workflow_id: 'build.yml',
-                ref: newTag,
-            })
-            core.info(`dispatch status: ${dispatch.status}`)
+            if(triggerBuild) {
+                // Trigger build workflow:
+                const dispatch = await octokit.rest.actions.createWorkflowDispatch({
+                    owner,
+                    repo,
+                    workflow_id: 'build.yml',
+                    ref: newTag,
+                })
+                core.info(`dispatch status: ${dispatch.status}`)
+            }
             return
         }
     } catch (error) {
