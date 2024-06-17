@@ -38,7 +38,7 @@ jobs:
 
 ### Branching conventions
 
-Your branchs must follow a name convention, here's a list of them:
+Your branches must follow a name convention, here's a list of them:
 
  - `release/.*`: labels PR as **feature** and increase the **major**
    version
