@@ -5,7 +5,7 @@ const Github = require('@actions/github');
 const semver = require('semver')
 const fs = require('fs');
 
-const allowedBaseBranch = /^([\w-]+:)?(?:master|main)$/
+const allowedBaseBranch = /^([\w-]+:)?(?:master|main|develop)$/
 type BranchType = {
     pattern: RegExp,
     bump: 'patch' | 'minor' | 'major' | 'chore',
