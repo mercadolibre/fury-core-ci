@@ -12,6 +12,7 @@ declare var process : {
     }
 }
 
+
 const allowedBaseBranch = /^([\w-]+:)?(?:master|main|develop)$/
 type BranchType = {
     pattern: RegExp,
@@ -19,11 +20,11 @@ type BranchType = {
     label: string
 }
 const branchTypes: Array<BranchType> = [
-    {pattern: /^(\w*:)?fix\/.*/, bump: "patch", label: "fix"},
-    {pattern: /^(\w*:)?feature\/.*/, bump: "minor", label: "feature"},
-    {pattern: /^(\w*:)?release\/.*/, bump: "major", label: "release"},
-    {pattern: /^(\w*:)?chore\/.*/, bump: "chore", label: "chore"},
-    {pattern: /^revert-\d+-.*/, bump: "patch", label: "revert"},
+    {pattern: /^(\w*:)?fix\/([\w-]+)$/, bump: "patch", label: "fix"},
+    {pattern: /^(\w*:)?feature\/([\w-]+)$/, bump: "minor", label: "feature"},
+    {pattern: /^(\w*:)?release\/([\w-]+)$/, bump: "major", label: "release"},
+    {pattern: /^(\w*:)?chore\/([\w-]+)$/, bump: "chore", label: "chore"},
+    {pattern: /^revert-\d+-([\w-]+)$/, bump: "patch", label: "revert"},
 ]
 
 const triggerBuild = core.getBooleanInput('trigger-build')
@@ -38,6 +39,12 @@ const {owner, repo} = Github.context.repo
 // most @actions toolkit packages have async methods
 async function run() {
     try {
+        // Validate envs and inputs
+        if(/^([\w-]+)$/.test(versionPrefix) === false) {
+            core.setFailed('Invalid version prefix.');
+            return
+        }
+
         let pr: WebhookPayloadPullRequestPullRequest
 
         // Extract from comment event
@@ -229,7 +236,7 @@ async function createTag(pr: WebhookPayloadPullRequestPullRequest) {
     core.info(`lastTag: ${lastTag}`)
     const bump = `${prefix}${pattern.bump}`
     if (preRelease) {
-        const rcName = `rc-${branch.replace(/[\/:_]/g, '-')}`
+        const rcName = `rc-${branch.replace(/[^a-zA-Z0-9-]/g, '-')}`
         const lastRC = await getLastRC(rcName)
         if (lastRC) {
             // increase RC number
