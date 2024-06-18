@@ -12855,11 +12855,11 @@ const semver = __importStar(__nccwpck_require__(1383));
 const fs = __importStar(__nccwpck_require__(7147));
 const allowedBaseBranch = /^([\w-]+:)?(?:master|main|develop)$/;
 const branchTypes = [
-    { pattern: /^(\w*:)?fix\/.*/, bump: "patch", label: "fix" },
-    { pattern: /^(\w*:)?feature\/.*/, bump: "minor", label: "feature" },
-    { pattern: /^(\w*:)?release\/.*/, bump: "major", label: "release" },
-    { pattern: /^(\w*:)?chore\/.*/, bump: "chore", label: "chore" },
-    { pattern: /^revert-\d+-.*/, bump: "patch", label: "revert" },
+    { pattern: /^(\w*:)?fix\/([\w-]+)$/, bump: "patch", label: "fix" },
+    { pattern: /^(\w*:)?feature\/([\w-]+)$/, bump: "minor", label: "feature" },
+    { pattern: /^(\w*:)?release\/([\w-]+)$/, bump: "major", label: "release" },
+    { pattern: /^(\w*:)?chore\/([\w-]+)$/, bump: "chore", label: "chore" },
+    { pattern: /^revert-\d+-([\w-]+)$/, bump: "patch", label: "revert" },
 ];
 const triggerBuild = core.getBooleanInput('trigger-build');
 let token = core.getInput('gh_token');
@@ -12872,6 +12872,11 @@ const { owner, repo } = Github.context.repo;
 // most @actions toolkit packages have async methods
 async function run() {
     try {
+        // Validate envs and inputs
+        if (versionPrefix !== "" && /^([\w-]+)$/.test(versionPrefix) === false) {
+            core.setFailed('Invalid version prefix.');
+            return;
+        }
         let pr;
         // Extract from comment event
         if (Github.context.eventName === 'issue_comment') {
@@ -13052,7 +13057,7 @@ async function createTag(pr) {
     core.info(`lastTag: ${lastTag}`);
     const bump = `${prefix}${pattern.bump}`;
     if (preRelease) {
-        const rcName = `rc-${branch.replace(/[\/:_]/g, '-')}`;
+        const rcName = `rc-${branch.replace(/[^a-zA-Z0-9-]/g, '-')}`;
         const lastRC = await getLastRC(rcName);
         if (lastRC) {
             // increase RC number
