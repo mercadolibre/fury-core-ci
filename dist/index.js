@@ -12873,7 +12873,7 @@ const { owner, repo } = Github.context.repo;
 async function run() {
     try {
         // Validate envs and inputs
-        if (/^([\w-]+)$/.test(versionPrefix) === false) {
+        if (versionPrefix !== "" && /^([\w-]+)$/.test(versionPrefix) === false) {
             core.setFailed('Invalid version prefix.');
             return;
         }
