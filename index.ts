@@ -167,7 +167,7 @@ async function addComment(prNumber:number, body:string) {
 
 async function bash(cmd:string) {
     return new Promise<{stdout: string, stderr:string}>(function (resolve, reject) {
-        exec(cmd, (err, stdout, stderr) => {
+        exec(cmd, {maxBuffer: 10 * 1024 * 1024},(err, stdout, stderr) => {
             if (err) {
                 reject(err);
             } else {

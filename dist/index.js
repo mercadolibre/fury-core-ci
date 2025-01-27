@@ -12992,7 +12992,7 @@ async function addComment(prNumber, body) {
 }
 async function bash(cmd) {
     return new Promise(function (resolve, reject) {
-        (0, child_process_1.exec)(cmd, (err, stdout, stderr) => {
+        (0, child_process_1.exec)(cmd, { maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
             if (err) {
                 reject(err);
             }
