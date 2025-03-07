@@ -20,6 +20,7 @@ type BranchType = {
     label: string
 }
 const branchTypes: Array<BranchType> = [
+    {pattern: /^(\w*:)?hotix\/([\w-]+)$/, bump: "patch", label: "fix"},
     {pattern: /^(\w*:)?fix\/([\w-]+)$/, bump: "patch", label: "fix"},
     {pattern: /^(\w*:)?feature\/([\w-]+)$/, bump: "minor", label: "feature"},
     {pattern: /^(\w*:)?release\/([\w-]+)$/, bump: "major", label: "release"},
