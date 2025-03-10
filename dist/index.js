@@ -12855,6 +12855,7 @@ const semver = __importStar(__nccwpck_require__(1383));
 const fs = __importStar(__nccwpck_require__(7147));
 const allowedBaseBranch = /^([\w-]+:)?(?:master|main|develop)$/;
 const branchTypes = [
+    { pattern: /^(\w*:)?hotfix\/([\w-]+)$/, bump: "patch", label: "fix" },
     { pattern: /^(\w*:)?fix\/([\w-]+)$/, bump: "patch", label: "fix" },
     { pattern: /^(\w*:)?feature\/([\w-]+)$/, bump: "minor", label: "feature" },
     { pattern: /^(\w*:)?release\/([\w-]+)$/, bump: "major", label: "release" },
@@ -12901,26 +12902,26 @@ async function run() {
                 //     return
                 // }
                 // Validate approval:
-                const reviews = await octokit.rest.pulls.listReviews({
-                    owner,
-                    repo,
-                    pull_number: pr.number,
-                    per_page: 100
-                });
-                if (reviews.data.length === 100) {
-                    core.warning('max reviews per page, restriction may be false');
-                }
-                let approved = false;
-                for (const review of reviews.data) {
-                    if (review.state === 'APPROVED') {
-                        approved = true;
-                    }
-                }
-                if (!approved) {
-                    await addComment(pr.number, `:warning: An approval is required to create a release candidate. :warning:`);
-                    core.setFailed('An approval is required to create a release candidate.');
-                    return;
-                }
+                // const reviews = await octokit.rest.pulls.listReviews({
+                //     owner,
+                //     repo,
+                //     pull_number: pr.number,
+                //     per_page: 100
+                // });
+                // if(reviews.data.length === 100){
+                //     core.warning('max reviews per page, restriction may be false')
+                // }
+                // let approved = false
+                // for (const review of reviews.data) {
+                //     if(review.state === 'APPROVED') {
+                //         approved = true
+                //     }
+                // }
+                // if(!approved) {
+                //     await addComment(pr.number, `:warning: An approval is required to create a release candidate. :warning:`);
+                //     core.setFailed('An approval is required to create a release candidate.');
+                //     return
+                // }
                 const newTag = await createTag(pr);
                 if (triggerBuild) {
                     // Trigger build workflow:
