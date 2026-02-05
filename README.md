@@ -1,4 +1,4 @@
-# Fury Core CI
+x# Fury Core CI
 
 CI workflow for creating git tags in your Fury Core Applications, the generated tags follows the standards of [Semantic Versioning](https://semver.org/).
 
