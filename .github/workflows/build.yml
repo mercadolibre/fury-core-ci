@@ -1,31 +1,49 @@
 name: Build
-on: workflow_dispatch
+permissions: {}
+
+on:
+  workflow_dispatch:
+
 jobs:
-  build_and_push:
+  build-and-push:
     name: Push Docker image to Docker Registry
     runs-on: ubuntu-latest
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
+    permissions:
+      contents: read # To read files in the repository.
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Extract metadata (tags, and labels) for Docker
+        id: metadata
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           flavor: |
             latest=false
           images: docker-core.artifacts.furycloud.io/mercadolibre/fury-core/${{ github.repository }}
 
-      - uses: actions/setup-node@v2
+      - name: Install Node.js and yarn
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          cache: yarn
+          node-version: 24 # Equivalent to the latest version of Node.js v24.x.x (LTS).
+
       - name: Build config
+        run: yarn install --immutable --immutable-cache --check-cache
         env:
           NODE_ENV: production
-        run: yarn install --frozen-file
 
       - run: |
           echo "Labels: $LABELS"
           echo "Tags: $TAGS"
         env:
-          TAGS: ${{ steps.meta.outputs.tags }}
-          LABELS: ${{ steps.meta.outputs.labels }}
+          TAGS: ${{ steps.metadata.outputs.tags }}
+          LABELS: ${{ steps.metadata.outputs.labels }}
 
+concurrency:
+  group: build
+  cancel-in-progress: true
