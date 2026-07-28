@@ -26,7 +26,7 @@ jobs:
     permissions:
       issues: write # To add labels and create comments.
       actions: write # To trigger `build.yml` workflow when `trigger-build` input is `true`.
-      contents: write # To read files in the repository.
+      contents: write # To create tags and releases.
 
     steps:
       - name: Checkout repository
