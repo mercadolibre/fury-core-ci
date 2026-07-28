@@ -26,6 +26,7 @@ const branchTypes: Array<BranchType> = [
     {pattern: /^(\w*:)?release\/([\w-]+)$/, bump: "major", label: "release"},
     {pattern: /^(\w*:)?chore\/([\w-]+)$/, bump: "chore", label: "chore"},
     {pattern: /^revert-\d+-([\w-]+)$/, bump: "patch", label: "revert"},
+    {pattern: /^dependabot\/[\w-]+\/[\w-.]+$/, bump: "chore", label: "chore"},
 ]
 
 const triggerBuild = core.getBooleanInput('trigger-build')
