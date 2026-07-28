@@ -1,17 +1,44 @@
-name: CI Checks
+name: Tagging
+permissions: {}
+
 on:
-  issue_comment:
-    types: [created]
   pull_request:
-    branches: [ master ]
-    types: [opened, synchronize, ready_for_review, edited, closed]
+    types:
+      - opened
+      - closed
+      - edited
+      - synchronize
+      - ready_for_review
+    branches:
+      - master
+
+  issue_comment:
+    types:
+      - created
+
 jobs:
-  build:
+  tag:
+    name: Tag and release
     runs-on: ubuntu-latest
+
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)) }}
+
+    permissions:
+      issues: write # To add labels and create comments.
+      actions: write # To trigger `build.yml` workflow when `trigger-build` input is `true`.
+      contents: write # To read files in the repository.
+
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
-    - name: Push RC tag
-      uses: ./
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Push RC tag
+        uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+concurrency:
+  group: tagging_${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
