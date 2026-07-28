@@ -1,49 +1,78 @@
 # Fury Core CI
 
-CI workflow for creating git tags in your Fury Core Applications, the generated tags follows the standards of [Semantic Versioning](https://semver.org/).
+GitHub Action for creating Git tags in your Fury Core applications following [Semantic Versioning](https://semver.org/). All merged pull requests will be automatically tagged according to [SemVer rules](https://semver.org/).
 
-#### Versioning
+> [!TIP]
+> If you comment `#tag` in any pull request, the action will create a release candidate tag.
 
-All merged PR's will be tagged according to the corresponding Semantic Version.
+## Branch conventions
 
-#### Release Candidates
+Your branches must follow a name convention, here's a list of them:
 
-You can write a comment `#tag` in any Pull Request to create a release candidate tag. 
+- `release/.*`: Labels pull request as **release** and increase the **MAJOR** version.
+- `feature/.*`: Labels pull request as **feature** and increase the **MINOR** version.
+- `chore/.*`: Labels pull request as **chore** without increasing the version.
+- `fix/.*`: Labels pull request as **fix** and increase the **PATCH** version.
+- `hotfix/.*`: Labels pull request as **fix** and increase the **PATCH** version.
+- `revert-.*`: Labels pull request as **revert** and increase the **PATCH** version.
 
-### How to use
+## Usage
 
-Put the following file in `.github/workflows/tagging.yml`
+Create `.github/workflows/tagging.yaml` file in your repository and paste the following content into it:
 
-```yml
-# .github/workflows/tagging.yml
-name: Tagging workflow
+```yaml
+name: Tagging
+permissions: {}
 
 on:
-  issue_comment:
-    types: [created]
   pull_request:
-    branches: [master]
-    types: [opened, synchronize, ready_for_review, edited, closed]
+    types:
+      - opened
+      - closed
+      - edited
+      - synchronize
+      - ready_for_review
+    branches:
+      - master # Replace with your repository default main branch.
+
+  issue_comment:
+    types:
+      - created
 
 jobs:
-  build:
+  tag:
+    name: Tag and release
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+
+    permissions:
+      issues: write # To add labels and create comments.
+      actions: write # To trigger `build.yml` workflow when `trigger-build` input is `true`.
+      contents: write # To create tags and releases.
+
+     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
       - name: Push RC tag
         uses: mercadolibre/fury-core-ci@v1
+        with:
+          trigger-build: false # Trigger a build workflow defined in the repository actions. Default is `false`.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+concurrency:
+  group: tagging_${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
 ```
 
-### Branching conventions
+> [!IMPORTANT]
+> To prevent security vulnerabilities, pin each action to a full length commit SHA associated with a published release.
 
-Your branchs must follow a name convention, here's a list of them:
+### Outputs
 
- - `release/.*`: labels PR as **feature** and increase the **major**
-   version
- - `feature/.*`: labels PR as **feature** and increase the **minor**
-   version
- - `fix/.*`: labels PR as **fix** and increase the **patch** version
- - `revert-.*`: labels PR as **revert** and increase the **patch** version
- - `chore/.*`: labels PR as **chore** without increasing the version
+| Output        | Description                        |
+| ------------- | ---------------------------------- |
+| `new_tag`     | Generated tag.                     |
+| `pre_release` | Whether it is a release candidate. |
